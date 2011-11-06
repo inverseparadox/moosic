@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+override_dh_auto_build:
+	mkdir doc/bak
+	cd doc && mv moosic.1 moosicd.1 Moosic_API.3 moosic.html moosicd.html Moosic_API.html bak/
+	cd doc && make
+	dh_auto_build
+
+override_dh_auto_install:
+	dh_auto_install
+	install -m 644 examples/completion debian/moosic/etc/bash_completion.d/moosic
+	rm -f debian/moosic/usr/share/doc/moosic/License.txt
+	rm -f debian/moosic/usr/share/doc/moosic/ChangeLog
+	rm -f debian/moosic/usr/share/doc/moosic/examples/completion
+
+override_dh_auto_clean:
+	-mv doc/bak/* doc/
+	-rmdir doc/bak
+	dh_auto_clean
+
+override_dh_installchangelogs:
+	dh_installchangelogs ChangeLog
+
+%:
+	dh $@ --with python2
