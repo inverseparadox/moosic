@@ -32,12 +32,6 @@ API_MINOR_VERSION = 8
 import xmlrpc.client, time, os, signal, random, re, errno, operator
 from xmlrpc.client import Boolean, Binary, True, False
 
-# Define the True and False constants if they don't already exist.
-try: True
-except NameError: True = 1
-try: False
-except NameError: False = 0
-
 # Import from my own modules.
 from . import xmlrpc_registry
 from .xmlrpc_registry import INT, BOOLEAN, DOUBLE, STRING, ARRAY, STRUCT, BASE64

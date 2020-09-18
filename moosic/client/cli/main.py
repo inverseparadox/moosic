@@ -32,12 +32,6 @@ from moosic.utilities import *
 from moosic.client.factory import *
 from moosic.client.cli.dispatcher import *
 
-# Define the True and False constants if they don't already exist.
-try: True
-except NameError: True = 1
-try: False
-except NameError: False = 0
-
 # Giving stderr a shorter name is convenient when printing error messages.
 err = sys.stderr
 

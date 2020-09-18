@@ -47,12 +47,6 @@ except ImportError:
     def call_find(dir):
         return os.popen('find "%s" -follow -type f -print' % sh_escape(dir)).readlines()
 
-# Define the True and False constants if they don't already exist.
-try: True
-except NameError: True = 1
-try: False
-except NameError: False = 0
-
 command_categories = {
     "add":"Adding to the song queue",
     "remove":"Removing from the song queue",

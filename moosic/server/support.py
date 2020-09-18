@@ -28,12 +28,6 @@
 import sys, os, os.path, string, threading, time, socket, traceback, errno
 import socketserver, xmlrpc.server
 
-# Define the True and False constants if they don't already exist.
-try: True
-except NameError: True = 1
-try: False
-except NameError: False = 0
-
 __all__ = ('data', 'readConfig', 'strConfig', 'getConfigFile', 'split_range',
            'Log', 'UnixMoosicRequestHandler', 'TcpMoosicRequestHandler',
            'UnixMoosicServer', 'TcpMoosicServer')

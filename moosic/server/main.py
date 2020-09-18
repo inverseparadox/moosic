@@ -31,12 +31,6 @@ import pickle as pickle
 from moosic import VERSION
 from moosic.server.daemonize import daemonize
 
-# Define the True and False constants if they don't already exist.
-try: True
-except NameError: True = 1
-try: False
-except NameError: False = 0
-
 #----- The Primary Components of moosicd -----#
 # moosicd consists of several interacting components: the request handler, the
 # queue consumer, and the song player.  The request handler is in charge of

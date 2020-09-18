@@ -43,12 +43,6 @@ It is safe to "import *" from this module.
 import xmlrpc.client, urllib.request, urllib.parse, urllib.error, http.client, socket, os, os.path, sys
 import moosic.server.main
 
-# Define the True and False constants if they don't already exist.
-try: True
-except NameError: True = 1
-try: False
-except NameError: False = 0
-
 
 __all__ = ('startServer', 'LocalMoosicProxy', 'UnixMoosicProxy',
            'InetMoosicProxy', 'UnixStreamTransport')
