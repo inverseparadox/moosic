@@ -71,14 +71,7 @@ class UnixStreamTransport(xmlrpc.client.Transport):
                         self.sock.close()
                     self.sock = None
                     raise
-        class HTTP(http.client.HTTP):
-            _connection_class = HTTPConnection
-        # Older versions of xmlrpclib.Transport use the deprecated httplib.HTTP
-        # class, while newer versions use httplib.HTTPConnection.
-        if sys.version_info < (2,7):
-            return HTTP(host)
-        else:
-            return HTTPConnection(host)
+        return HTTPConnection(host)
 
 
 def LocalMoosicProxy(filename=None):
