@@ -30,7 +30,7 @@ API_MINOR_VERSION = 8
 
 # Import from the standard library.
 import xmlrpc.client, time, os, signal, random, re, errno, operator
-from xmlrpc.client import Boolean, Binary, True, False
+from xmlrpc.client import Boolean, Binary
 
 # Import from my own modules.
 from . import xmlrpc_registry
