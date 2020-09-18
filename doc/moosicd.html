@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>moosicd - the server for the Moosic jukebox system.</title>
+<link rev="made" href="mailto:root@localhost" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#configuration">CONFIGURATION</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>moosicd - the server for the Moosic jukebox system.</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>moosicd</strong> <strong>--help</strong>|<strong>-h</strong>|<strong>--version</strong>|<strong>-v</strong></p>
+<p><strong>moosicd</strong> [<strong>--history-size</strong>|<strong>-s</strong> <em>size</em>] [<strong>--config</strong>|<strong>-c</strong> <em>directory</em>] [<strong>--quiet</strong>|<strong>-q</strong>|<strong>--debug</strong>|<strong>-d</strong>] [<strong>-S</strong>|<strong>--stdout</strong>] [<strong>-t</strong>|<strong>--tcp</strong> <em>port</em>] [<strong>-T</strong>|<strong>--tcp-also</strong> <em>port</em>] [<strong>-l</strong>|<strong>--local-only</strong>]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p><strong>moosicd</strong> is the server for the Moosic jukebox system. It sits around, waiting
+to respond to commands given by a Moosic client (such as <a href="././moosic.html">the moosic manpage</a>(1)). It
+also maintains a queue of items to be played, and if this queue is not empty,
+it pops off the first item from the head of the queue and executes a
+user-configurable command on that item. When this command terminates,
+<strong>moosicd</strong> goes on to the next item in its queue, assuming that the queue is
+not empty.</p>
+<p><strong>moosicd</strong> is not meant to be used as a system-wide daemon that serves all users
+on a system.  Rather, every user that wishes to use Moosic should start a
+separate instance of <strong>moosicd</strong>, and one user cannot communicate with the Moosic
+server of another user without taking special measures (i.e. using the <strong>-c</strong> or
+<strong>-t</strong> options to <strong>moosic</strong>).</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p><strong>moosicd</strong> is designed so that you normally don't need to use any of these
+options.</p>
+<dl>
+<dt><strong><a name="item__2dh_2c__2d_2dhelp"><strong>-h</strong>, <strong>--help</strong></a></strong><br />
+</dt>
+<dd>
+Prints help text and exits.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dv_2c__2d_2dversion"><strong>-v</strong>, <strong>--version</strong></a></strong><br />
+</dt>
+<dd>
+Prints version information and exits.
+</dd>
+<p></p>
+<dt><strong><a name="item__2ds_size_2c__2d_2dhistory_2dsize_size"><strong>-s</strong> <em>size</em>, <strong>--history-size</strong> <em>size</em></a></strong><br />
+</dt>
+<dd>
+<strong>moosicd</strong> remembers the file names of previous songs that it played. This
+option sets the maximum size of this history list. The default value is 50.
+</dd>
+<p></p>
+<dt><strong><a name="item__2df_2c__2d_2dforeground"><strong>-f</strong>, <strong>--foreground</strong></a></strong><br />
+</dt>
+<dd>
+By default, <strong>moosicd</strong> detaches itself from the current terminal and puts itself
+in the background (i.e. it becomes a daemon).  This option disables such
+behavior.
+</dd>
+<p></p>
+<dt><strong><a name="item__2ds_2c__2d_2dstdout"><strong>-S</strong>, <strong>--stdout</strong></a></strong><br />
+</dt>
+<dd>
+By default, <strong>moosicd</strong> logs almost all of its printed output to a file. When
+this option is used, the output is instead printed to the standard output
+device. This also prevents the program from putting itself in the background and
+detaching from the current terminal.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dq_2c__2d_2dquiet"><strong>-q</strong>, <strong>--quiet</strong></a></strong><br />
+</dt>
+<dd>
+This option suppresses almost all printed output from <strong>moosicd</strong>. Note that, by
+default, <strong>moosicd</strong> prints this output to a file, not the standard output
+device.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dd_2c__2d_2ddebug"><strong>-d</strong>, <strong>--debug</strong></a></strong><br />
+</dt>
+<dd>
+This option causes <strong>moosicd</strong> to print lots and lots of messages about what
+it's doing. These messages are usually quite superfluous and bothersome. Note
+that unless the <strong>-S</strong> option is used these messages will appear in the log file
+instead of the standard output device.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dc_directory_2c__2d_2dconfig_directory"><strong>-c</strong> <em>directory</em>, <strong>--config</strong> <em>directory</em></a></strong><br />
+</dt>
+<dd>
+Specifies the directory where moosicd should keep the various files that it
+uses. The default directory is <em>~/.moosic/</em>. This option is useful only in
+extraordinary circumstances. If this option is used, any Moosic clients that
+wish to communicate with <strong>moosicd</strong> must be told to use the specified directory
+instead of the default.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dt_port_2c__2d_2dtcp_port"><strong>-t</strong> <em>port</em>, <strong>--tcp</strong> <em>port</em></a></strong><br />
+</dt>
+<dd>
+This option directs the server to listen to the given TCP port number for client
+requests instead of using the normal communication method.  Use of this option
+without the <strong>-l</strong> option is <em>highly discouraged</em> unless you know what you are
+doing because there is no guarantee that <strong>moosicd</strong> is secure against malicious
+input from a remote location.  Note that an instance of <strong>moosicd</strong> which is
+started with this option will not accept requests from a client that is using
+the normal communication method.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dt_port_2c__2d_2dtcp_2dalso_port"><strong>-T</strong> <em>port</em>, <strong>--tcp-also</strong> <em>port</em></a></strong><br />
+</dt>
+<dd>
+This option directs the server to listen to the given TCP port number for client
+requests in addition to using the normal communication method.  Use of this
+option without the <strong>-l</strong> option is <em>highly discouraged</em> unless you know what
+you are doing because there is no guarantee that <strong>moosicd</strong> is secure against
+malicious input from a remote location.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dl_2c__2d_2dlocal_2donly"><strong>-l</strong>, <strong>--local-only</strong></a></strong><br />
+</dt>
+<dd>
+This directs the server to only listen for TCP connections that originate from
+the local computer, refusing connections from remote hosts.  This only has an
+effect when <strong>--tcp</strong> or <strong>--tcp-also</strong> is used.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="configuration">CONFIGURATION</a></h1>
+<p><strong>moosicd</strong> figures out how to play items in its queue by consulting its
+configuration file, which associates string patterns (in the form of
+Perl-compatible regular expressions) with commands.</p>
+<p>The format of this file is as follows: Every pair of lines forms a unit. The
+first line in a pair is a regular expression that will be matched against items
+in the queue. The second line in a pair is the command that will be used to play
+any items that match the regular expression. The name of the item to be played
+will be appended to the end of this command, unless the command line includes a
+special substitution string.</p>
+<p>The simplest kind of substitution string is ``$item''.  Every occurrence of
+``$item'' in the command will be replaced with the name of the song to be played.
+The other kind of substitution is called ``matched group substitution'', and is
+used to refer to specific parts of the name of the song to be played.</p>
+<p>The command will not be interpreted by a shell, so don't bother trying to use
+shell variables or globbing or I/O redirection, and be mindful of how you use
+quotes and parentheses.  If you need any of these fancy features, wrap up the
+command in a real shell script (and remember to use an ``exec'' statement in your
+shell script to invoke the program that does the actual song playing, otherwise
+Moosic won't be able to do things like stop or pause the song).</p>
+<p>Blank lines and lines starting with a '#' character are ignored. Regular
+expressions specified earlier in this file take precedence over those specified
+later.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<p><strong>moosicd</strong> makes use of several files, all of which are found in the
+<em>.moosic/</em> directory in the home directory of the user who invoked the
+program (unless the -c or --config option is used).</p>
+<dl>
+<dt><strong><a name="item_config"><em>config</em></a></strong><br />
+</dt>
+<dd>
+This is the configuration file that <strong>moosicd</strong> uses to associate file-types to
+player commands, as explained above.
+</dd>
+<p></p>
+<dt><strong><a name="item_server_log"><em>server_log</em></a></strong><br />
+</dt>
+<dd>
+<strong>moosicd</strong> logs short notices of its activities to this file unless the <strong>-S</strong>
+option is used. It usually contains nothing more than a history of what songs
+have been played.
+</dd>
+<p></p>
+<dt><strong><a name="item_player_log"><em>player_log</em></a></strong><br />
+</dt>
+<dd>
+This file contains the output of the player commands which are spawned by
+<strong>moosicd</strong>.
+</dd>
+<p></p>
+<dt><strong><a name="item_socket"><em>socket</em></a></strong><br />
+</dt>
+<dd>
+This is a socket file which is (normally) used to allow Moosic clients to
+contact the Moosic server. If <strong>moosicd</strong> isn't shut down properly, this file
+will need to be removed by hand. You should leave this file alone under other
+circumstances.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p><a href="././moosic.html">the moosic manpage</a>(1), the standard command-line Moosic client.</p>
+<p>The chapter entitled ``Regular Expression Syntax''
+<a href="http://www.python.org/doc/current/lib/re-syntax.html">http://www.python.org/doc/current/lib/re-syntax.html</a> from the section dealing
+with the <strong>re</strong> module in the <em>Python Library Reference</em>, for details on the
+syntax of a regular expression.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Daniel Pearson &lt;<a href="mailto:daniel@nanoo.org">daniel@nanoo.org</a>&gt;</p>
+
+</body>
+
+</html>

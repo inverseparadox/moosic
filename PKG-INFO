@@ -1,0 +1,31 @@
+Metadata-Version: 1.0
+Name: moosic
+Version: 1.5.6
+Summary: A powerful music queue manager.
+Home-page: http://www.nanoo.org/moosic/
+Author: Daniel J. Pearson
+Author-email: daniel@nanoo.org
+License: The Unlicense
+Description: 
+        Moosic is a music player that focuses on easy playlist management. It consists
+        of a server process that maintains a queue of music files to play and a client
+        program which sends commands to the server. The server continually runs through
+        its playlist, popping items off the top of the list and playing each with an
+        external program. The client is a simple command-line utility which allows you
+        to perform powerful operations upon the server's queue, including the addition
+        of whole directory trees, automatic shuffling, and item removal according to
+        regular expressions. The server comes configured to play MP3, Ogg, MIDI, MOD,
+        and WAV files.
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Environment :: No Input/Output (Daemon)
+Classifier: Intended Audience :: End Users/Desktop
+Classifier: License :: Public Domain
+Classifier: Natural Language :: English
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python
+Classifier: Topic :: Multimedia :: Sound/Audio :: Players
+Classifier: Topic :: Multimedia :: Sound/Audio :: Players :: MP3

@@ -1,0 +1,1069 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>moosic - a command-line client for the Moosic jukebox system.</title>
+<link rev="made" href="mailto:root@b19.apple.com" />
+</head>
+
+<body style="background-color: white">
+
+<p><a name="__index__"></a></p>
+<!-- INDEX BEGIN -->
+
+<ul>
+
+	<li><a href="#name">NAME</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
+	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#usage">USAGE</a></li>
+	<li><a href="#options">OPTIONS</a></li>
+	<li><a href="#commands">COMMANDS</a></li>
+	<ul>
+
+		<li><a href="#querying_for_information">Querying for information</a></li>
+		<li><a href="#adding_to_the_song_queue">Adding to the song queue</a></li>
+		<li><a href="#removing_from_the_song_queue">Removing from the song queue</a></li>
+		<li><a href="#rearranging_the_song_queue">Rearranging the song queue</a></li>
+		<li><a href="#general_management">General management</a></li>
+	</ul>
+
+	<li><a href="#audio_cd_support">AUDIO CD SUPPORT</a></li>
+	<li><a href="#files">FILES</a></li>
+	<li><a href="#see_also">SEE ALSO</a></li>
+	<li><a href="#author">AUTHOR</a></li>
+</ul>
+<!-- INDEX END -->
+
+<hr />
+<p>
+</p>
+<h1><a name="name">NAME</a></h1>
+<p>moosic - a command-line client for the Moosic jukebox system.</p>
+<p>
+</p>
+<hr />
+<h1><a name="synopsis">SYNOPSIS</a></h1>
+<p><strong>moosic</strong> [<em>options</em>] <em>command</em> [<em>options</em>] [<em>command arguments</em>]</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>The <strong>moosic</strong> program is the command-line interface to the Moosic jukebox
+system.  It communicates with <a href="././moosicd.html">the moosicd manpage</a>(1), the Moosic server, querying the
+server for information and telling the server what to do.  <strong>moosic</strong> will not be
+able to do very much unless <strong>moosicd</strong> is running.  When <strong>moosicd</strong> isn't already
+running, <strong>moosic</strong> will automatically start it for you, unless you specifically
+request otherwise (with the --no-startserver option).</p>
+<p>
+</p>
+<hr />
+<h1><a name="usage">USAGE</a></h1>
+<p><strong>moosic</strong> works by sending a command to the Moosic server and returning the
+response, if any.  The first non-option argument given to <strong>moosic</strong> is the name
+of the command to be performed.  This command name is case-insensitive, and all
+non-alphanumeric characters in it are ignored.  You can use the ``help'' command
+to quickly and easily view the names of all the available commands and to get a
+brief description of individual commands.  You can also use <code>moosic
+--showcommands</code> to display the short descriptions of all the commands at once.
+The <a href="#commands">COMMANDS</a> section below lists the full details of each command.  There
+are very many commands, so you should start by just learning a few commonly used
+commands, and only learning others as you feel the need.  I recommend starting
+with the following short command vocabulary: add, list, stop, play, and shuffle.</p>
+<p>For example, <code>moosic add foo.mp3</code> adds the file <em>foo.mp3</em> (in the current
+directory) to the end of the song queue and returns you immediately back to your
+shell prompt without printing any output (unless an error occurs).  Compare with
+<code>moosic list</code>, which will list the contents of the song queue.  Note that if
+the song queue is empty, <code>moosic list</code> will not display anything.</p>
+<p>
+</p>
+<hr />
+<h1><a name="options">OPTIONS</a></h1>
+<p>Most of the options for <strong>moosic</strong> are only relevant if they are used with one of
+the commands that take a <em>filelist</em> argument.  See <a href="#commands">COMMANDS</a> for the
+definition of a <em>filelist</em>.  The only shuffling options that don't mutually
+exclude each other are <strong>-d</strong> and <strong>-a</strong>.  Shuffling options that are named later
+on the command line take precedence over ones that occur earlier.  All options
+must be named immediately before the <em>command</em> given to <strong>moosic</strong> or
+immediately after the <em>command</em>; options placed within the list of the
+command's arguments will not be interpreted as options.</p>
+<dl>
+<dt><strong><a name="item__2dg_2c__2d_2dshuffle_2dglobal"><strong>-g</strong>, <strong>--shuffle-global</strong></a></strong><br />
+</dt>
+<dd>
+This option causes <strong>moosic</strong> to shuffle the entire <em>filelist</em> after directory
+expansion has taken place, before sending the <em>filelist</em> to the Moosic server.
+This is the default behavior.  This option is only meaningful if used in
+conjunction with a command that accepts a <em>filelist</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dd_2c__2d_2dshuffle_2ddir"><strong>-d</strong>, <strong>--shuffle-dir</strong></a></strong><br />
+</dt>
+<dd>
+This option causes <strong>moosic</strong> to shuffle the results of expanding the
+directories named in the <em>filelist</em>.  This option is only meaningful if used in
+conjunction with a command that accepts a <em>filelist</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2da_2c__2d_2dshuffle_2dargs"><strong>-a</strong>, <strong>--shuffle-args</strong></a></strong><br />
+</dt>
+<dd>
+This option causes <strong>moosic</strong> to shuffle the actual command line arguments that
+comprise the <em>filelist</em>.  This option is only meaningful if used in conjunction
+with a command that accepts a <em>filelist</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2do_2c__2d_2dinorder"><strong>-o</strong>, <strong>--inorder</strong></a></strong><br />
+</dt>
+<dd>
+When this option is used, <strong>moosic</strong> doesn't shuffle the <em>filelist</em> named on the
+command line at all.  Rather, the order specified on the command line is
+preserved.  This option is only meaningful if used in conjunction with a command
+that accepts a <em>filelist</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2ds_2c__2d_2dsort"><strong>-s</strong>, <strong>--sort</strong></a></strong><br />
+</dt>
+<dd>
+When this option is used, <strong>moosic</strong> sorts the <em>filelist</em> lexicographically
+after it has been expanded (through directory recursion or auto-finding or the
+like).  The order specified on the command line is ignored.  This option is only
+meaningful if used in conjunction with a command that accepts a <em>filelist</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dr_2c__2d_2dno_2drecurse"><strong>-r</strong>, <strong>--no-recurse</strong></a></strong><br />
+</dt>
+<dd>
+Using this option prevents <strong>moosic</strong> from replacing directories named in the
+<em>filelist</em> with a recursive traversal of their contents.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dn_2c__2d_2dno_2dfile_2dmunge"><strong>-n</strong>, <strong>--no-file-munge</strong></a></strong><br />
+</dt>
+<dd>
+Using this option prevents <strong>moosic</strong> from modifying the names in the expanded
+<em>filelist</em>.  Normally, <strong>moosic</strong> converts relative filenames into absolute
+filenames before sending the names to <strong>moosicd</strong>, but this is generally not
+desirable behavior if you want to insert items that aren't local files into the
+queue (such as URLs).  This option is only meaningful if used in conjunction with
+a command that accepts a <em>filelist</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2di_2c__2d_2dignore_2dcase"><strong>-i</strong>, <strong>--ignore-case</strong></a></strong><br />
+</dt>
+<dd>
+Treats any given regular expressions as if they were case-insensitive.  This
+option is only meaningful if used in conjunction with a command that accepts one
+or more regular expressions as arguments.  This option is syntactic sugar, since
+the regular expressions supported by Moosic can also be made case-insensitive by
+including ``(?i)'' within the regular expression.
+</dd>
+<p></p>
+<dt><strong><a name="item__2df_2c__2d_2dauto_2dfind"><strong>-f</strong>, <strong>--auto-find</strong></a></strong><br />
+</dt>
+<dd>
+This option causes each string in the <em>filelist</em> with the results of performing
+a ``fuzzy'' search for music files.  ``Fuzzy'' matching is done by simplifying all
+the candidate filenames (by lowering the case and removing all non-alphanumeric
+characters except slashes) and then testing to see if the search string (which
+has been similarly simplified) is contained in any of the filenames.  The list
+of candidate filenames is obtained by recursively traversing the file hierarchy
+rooted at the directory specified by the <strong>--music-dir</strong> option (which has a
+default value of <em>~/music/</em>).
+</dd>
+<dd>
+<p>For example, if you use <code>moosic -f add severedgoddess</code>, and the file
+<em>~/music/Meat_Puppets/Severed_Goddess_Hand.mp3</em> exists, then this file will be
+included in the list of files to be added to the queue.  Similarly, if you use
+<code>moosic -f pre nesad</code>, and the directory <em>~/music/J/Jane's Addiction/</em> exists,
+then all the files in this directory (and its subdirectories) will be included
+in the list of files to be prepended to the queue.</p>
+</dd>
+<dd>
+<p>This option is only meaningful if used in conjunction with a command that
+accepts a <em>filelist</em>.  Beware that using this option can cause <strong>moosic</strong> to
+take a long time to complete if the directory tree being searched contains a
+very large number of files.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item__2df_2c__2d_2dauto_2dgrep"><strong>-F</strong>, <strong>--auto-grep</strong></a></strong><br />
+</dt>
+<dd>
+This option enables behavior very much like that of the <strong>--auto-find</strong> option,
+except that regular expression searching is used instead of the ``fuzzy'' search
+scheme.  Specifically, each string in the <em>filelist</em> is treated as a regular
+expression, and is replaced with all the filenames that match the expression.
+As with <strong>--auto-find</strong>, the filenames that are eligible for matching are
+obtained by traversing the directory named with the <strong>--music-dir</strong> option
+(defaulting to <em>~/music/</em> if <strong>--music-dir</strong> is not used).  Essentially,
+<code>moosic -F prepend something</code> is semantically equivalent to
+<code>moosic prepend `find ~/music/ | grep something`</code>, but is syntactically a lot
+sweeter.
+</dd>
+<dd>
+<p>This option is only meaningful if used in conjunction with a command that
+accepts a <em>filelist</em>.  Beware that using this option can cause <strong>moosic</strong> to
+take a long time to complete if the directory tree being searched contains a
+very large number of files.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item__2dm_directory_2c__2d_2dmusic_2ddir_directory"><strong>-m</strong> <em>directory</em>, <strong>--music-dir</strong> <em>directory</em></a></strong><br />
+</dt>
+<dd>
+This option controls which directory is used for searching when the ``auto-find''
+or ``auto-grep'' feature is enabled.  These automatic searches are limited to the
+file hierarchy rooted at the directory specified by this option.  When this
+option is not used, the <em>~/music/</em> directory is used as a default.  This option
+is only meaningful if either <strong>--auto-find</strong> or <strong>--auto-grep</strong> is used.
+</dd>
+<p></p>
+<dt><strong><a name="item__2ds_2c__2d_2dshowcommands"><strong>-S</strong>, <strong>--showcommands</strong></a></strong><br />
+</dt>
+<dd>
+Prints a list of the commands that may be used with <strong>moosic</strong> and then exits.
+Note that this output is quite copious, so you will probably want to pipe it to
+a text pager, such as <strong>less</strong>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dh_2c__2d_2dhelp"><strong>-h</strong>, <strong>--help</strong></a></strong><br />
+</dt>
+<dd>
+Prints a short help message that explains the command line options and then
+exits.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dv_2c__2d_2dversion"><strong>-v</strong>, <strong>--version</strong></a></strong><br />
+</dt>
+<dd>
+Prints version information and then exits.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dc_directory_2c__2d_2dconfig_2ddir_directory"><strong>-c</strong> <em>directory</em>, <strong>--config-dir</strong> <em>directory</em></a></strong><br />
+</dt>
+<dd>
+This option is not needed under normal circumstances.  It should only be used
+if you want <strong>moosic</strong> to communicate with an instance of <strong>moosicd</strong> which was
+invoked with the <strong>-c</strong>/<strong>--config</strong> option.  Using this option tells <strong>moosic</strong>
+to search the specified directory for the files which are usually found in
+<em>~/.moosic/</em>.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dt_host_3aport_2c__2d_2dtcp_host_3aport"><strong>-t</strong> <em>host</em>:<em>port</em>, <strong>--tcp</strong> <em>host</em>:<em>port</em></a></strong><br />
+</dt>
+<dd>
+This option tells <strong>moosic</strong> to communicate with a Moosic server that is
+listening to the specified TCP/IP port on the specified host.  Running a Moosic
+server that accepts requests via TCP/IP is not recommended because it is a
+security risk.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dn_2c__2d_2dno_2dstartserver"><strong>-N</strong>, <strong>--no-startserver</strong></a></strong><br />
+</dt>
+<dd>
+This option prevents <strong>moosic</strong> from trying to automatically start <strong>moosicd</strong> if
+it can't contact a Moosic server.
+</dd>
+<p></p>
+<dt><strong><a name="item__2du_2c__2d_2dallow_2dunplayable"><strong>-U</strong>, <strong>--allow-unplayable</strong></a></strong><br />
+</dt>
+<dd>
+This option allows songs that the server doesn't know how to play to be added
+into the song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item__2dc_2c__2d_2dcurrent_2din_2dlist"><strong>-C</strong>, <strong>--current-in-list</strong></a></strong><br />
+</dt>
+<dd>
+This option causes the currently playing song to be printed at the top of the
+output of the ``list'' and ``plainlist'' commands.  It has no effect if an argument
+is given to these commands or if used with other commands.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="commands">COMMANDS</a></h1>
+<p>Any of these commands may be specified with any mixture of upper-case and
+lower-case letters, and non-alphabetic characters (such as '-') may be omitted.</p>
+<p>Many of these commands accept a <em>range</em> argument.  A <em>range</em> is a pair of
+colon-separated numbers.  Such a <em>range</em> addresses all items whose index in the
+song queue is both greater than or equal to the first number and less than the
+second number.  For example, ``3:7'' addresses items 3, 4, 5, and 6.  If the first
+number in the pair is omitted, then the <em>range</em> starts at the beginning of the
+song queue.  If the second number in the pair is omitted, then the <em>range</em>
+extends to include the last item in the song queue.  A <em>range</em> can also be a
+single number (with no colon), in which case it addresses the single item whose
+index is that of the given number.  Negative numbers may be used to index items
+from the end of the list instead of the beginning.  Thus, -1 refers to the last
+item in the song queue, -2 refers to the second-to-last item, etc.</p>
+<p>Beware that a negative number that immediately follows a moosic <em>command</em> is
+liable to be incorrectly interpreted as an option, so option processing should
+be explicitly terminated with an argument of ``--'' between the <em>command</em> and the
+number.  This is illustrated by the following example, which removes the last
+item in the queue: <code>moosic del -- -1</code></p>
+<p>Alternatively (and perhaps more conveniently), you can prevent negative numbers
+from being interpreted as options by preceding the range with a single character
+that can't be mistaken for a number or an option (i.e. any character that isn't
+a digit or a dash).  Example: <code>moosic list /-15:-9</code>.  You can also place such a
+character at the end of the range if you think it makes it look prettier.
+Example: <code>moosic list /-15:-9/</code>.  The bracketing characters surrounding a range
+need not be the same: <code>moosic shuffle '[-13:8]'</code>.  Notice how the preceding
+example surrounded the range in quotes to prevent the shell from treating the
+``['' and ``]'' characters specially (since shells have a habit of doing things like
+that).</p>
+<p>
+</p>
+<h2><a name="querying_for_information">Querying for information</a></h2>
+<p>These commands print useful bits of information to standard output.</p>
+<dl>
+<dt><strong><a name="item_help__5bcommand__2e_2e_2e_5d"><strong>help</strong> [<em>command</em> ...]</a></strong><br />
+</dt>
+<dd>
+Prints a brief description of the moosic commands named as arguments.  If no
+arguments are given, a list of all the available moosic commands is printed.
+</dd>
+<p></p>
+<dt><strong><a name="item_current"><strong>current</strong></a></strong><br />
+</dt>
+<dd>
+Print the name of the song that is currently playing.
+</dd>
+<p></p>
+<dt><strong><a name="item_curr"><strong>curr</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``current''.
+</dd>
+<p></p>
+<dt><strong><a name="item_current_2dtime__5bformat_5d"><strong>current-time</strong> [<em>format</em>]</a></strong><br />
+</dt>
+<dd>
+Print the amount of time that the current song has been playing.  By default,
+this time is printed in a format of ``hours:minutes:seconds'', but if a different
+format is desired, a string argument can be given to specify it.  The format
+should be a string that is appropriate for passing to the <code>strftime(3)</code> function.
+</dd>
+<p></p>
+<dt><strong><a name="item_list__5brange_5d"><strong>list</strong> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+Print the list of items in the current song queue.  A whole number is printed
+before each item in the list, indicating its position in the queue.  If a range
+is specified, only the items that fall within that range are listed.  Remember
+that the song queue does not contain the currently playing song.
+</dd>
+<p></p>
+<dt><strong><a name="item_plainlist__5brange_5d"><strong>plainlist</strong> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+Print the current song queue without numbering each line.  If a range is
+specified, only the items that fall within that range are listed.  This output
+is suitable for saving to a file which can be reloaded by the ``pl-append'',
+``pl-prepend'', ``pl-insert'', and ``pl-mixin'' commands.
+</dd>
+<p></p>
+<dt><strong><a name="item_history__5bnumber_5d"><strong>history</strong> [<em>number</em>]</a></strong><br />
+</dt>
+<dd>
+Print a list of items that were recently played.  The times mentioned in the
+output of this command represents the time that a song finished playing.  If a
+number is specified, then no more than that number of entries will be printed.
+If a number is not specified, then the entire history is printed.  Note that
+<strong>moosicd</strong> limits the number of items stored in its history list.
+</dd>
+<p></p>
+<dt><strong><a name="item_hist__5bnumber_5d"><strong>hist</strong> [<em>number</em>]</a></strong><br />
+</dt>
+<dd>
+An alias for ``history''.
+</dd>
+<p></p>
+<dt><strong><a name="item_state"><strong>state</strong></a></strong><br />
+</dt>
+<dd>
+Print the current state of the music daemon.
+</dd>
+<p></p>
+<dt><strong><a name="item_status"><strong>status</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``state''.
+</dd>
+<p></p>
+<dt><strong><a name="item_length"><strong>length</strong></a></strong><br />
+</dt>
+<dd>
+Print the number of items in the queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_len"><strong>len</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``length''.
+</dd>
+<p></p>
+<dt><strong><a name="item_ispaused"><strong>ispaused</strong></a></strong><br />
+</dt>
+<dd>
+Show whether the current song is paused or not. If the song is paused, ``True'' is
+printed and <strong>moosic</strong> returns normally. If the song is not paused, ``False'' is
+printed and <strong>moosic</strong> returns with a non-zero exit status (which happens to be 2
+for no particular reason).
+</dd>
+<p></p>
+<dt><strong><a name="item_islooping"><strong>islooping</strong></a></strong><br />
+</dt>
+<dd>
+Show whether the server is in loop mode. If the server is in loop mode, ``True''
+is printed and <strong>moosic</strong> returns normally. If not, ``False'' is printed and
+<strong>moosic</strong> returns with a non-zero exit status (which happens to be 2 for no
+particular reason).
+</dd>
+<p></p>
+<dt><strong><a name="item_isadvancing"><strong>isadvancing</strong></a></strong><br />
+</dt>
+<dd>
+Show whether the server is advancing through the song queue. If the server is
+advancing, ``True'' is printed and <strong>moosic</strong> returns normally. If not, ``False'' is
+printed and <strong>moosic</strong> returns with a non-zero exit status (which happens to be 2
+for no particular reason).
+</dd>
+<p></p>
+<dt><strong><a name="item_version"><strong>version</strong></a></strong><br />
+</dt>
+<dd>
+Print version information for both the client and the server, and then exit.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<h2><a name="adding_to_the_song_queue">Adding to the song queue</a></h2>
+<p>These commands will add to the queue of items to be played.  Many of these
+commands accept a <em>filelist</em> argument.  A <em>filelist</em> is a list of one or more
+files or directories.  Any directories named in the list will be replaced by a
+list of files produced by recursively traversing the contents of the directory
+(unless the <strong>--no-file-munge</strong> option or <strong>--no-recurse</strong> option is being used).
+Depending on the shuffling options specified when invoking <strong>moosic</strong>, the list
+will be shuffled before being added to the Moosic server's queue.</p>
+<dl>
+<dt><strong><a name="item_append_filelist"><strong>append</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Add the files to be played to the end of the song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_add_filelist"><strong>add</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+An alias for ``append''.
+</dd>
+<p></p>
+<dt><strong><a name="item_pl_2dappend_playlist_2dfile__2e_2e_2e"><strong>pl-append</strong> <em>playlist-file</em> ...</a></strong><br />
+</dt>
+<dd>
+Add the items listed in the given playlist files to the end of the song queue.
+If ``-'' (a single dash) is given as the name of a playlist file, data will be
+read from from standard input instead of trying to read from a file named ``-''.
+</dd>
+<p></p>
+<dt><strong><a name="item_pl_2dadd_playlist_2dfile__2e_2e_2e"><strong>pl-add</strong> <em>playlist-file</em> ...</a></strong><br />
+</dt>
+<dd>
+An alias for ``pl-append''.
+</dd>
+<p></p>
+<dt><strong><a name="item_prepend_filelist"><strong>prepend</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Add the files to be played to the beginning of the song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_pre_filelist"><strong>pre</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+An alias for ``prepend''.
+</dd>
+<p></p>
+<dt><strong><a name="item_pl_2dprepend_playlist_2dfile__2e_2e_2e"><strong>pl-prepend</strong> <em>playlist-file</em> ...</a></strong><br />
+</dt>
+<dd>
+Add the items listed in the given playlist files to the beginning of the song
+queue.  If ``-'' (a single dash) is given as the name of a playlist file, data
+will be read from from standard input instead of trying to read from a file
+named ``-''.
+</dd>
+<p></p>
+<dt><strong><a name="item_mixin_filelist"><strong>mixin</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Add the files to the song queue and reshuffle the entire song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_pl_2dmixin_playlist_2dfile__2e_2e_2e"><strong>pl-mixin</strong> <em>playlist-file</em> ...</a></strong><br />
+</dt>
+<dd>
+Add the items listed in the given playlist files to the song queue and reshuffle
+the entire song queue.  If ``-'' (a single dash) is given as the name of a
+playlist file, data will be read from from standard input instead of trying to
+read from a file named ``-''.
+</dd>
+<p></p>
+<dt><strong><a name="item_replace_filelist"><strong>replace</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Replace the current contents of the song queue with the songs contained in the
+filelist.
+</dd>
+<p></p>
+<dt><strong><a name="item_pl_2dreplace_playlist_2dfile__2e_2e_2e"><strong>pl-replace</strong> <em>playlist-file</em> ...</a></strong><br />
+</dt>
+<dd>
+Replace the current contents of the song queue with the songs named in the given
+playlists.
+</dd>
+<p></p>
+<dt><strong><a name="item_insert_filelist_index"><strong>insert</strong> <em>filelist</em> <em>index</em></a></strong><br />
+</dt>
+<dd>
+Insert the given items at a given point in the song queue.  The items are
+inserted such that they will precede the item that previously occupied the
+specified index.
+</dd>
+<p></p>
+<dt><strong><a name="item_pl_2dinsert_playlist_2dfile__2e_2e_2e_index"><strong>pl-insert</strong> <em>playlist-file</em> ... <em>index</em></a></strong><br />
+</dt>
+<dd>
+Insert the items specified in the given playlist files at a specified point in
+the song queue.  If ``-'' (a single dash) is given as the name of a playlist file,
+data will be read from from standard input instead of trying to read from a file
+named ``-''.
+</dd>
+<p></p>
+<dt><strong><a name="item_putback"><strong>putback</strong></a></strong><br />
+</dt>
+<dd>
+Reinsert the current song at the start of the song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_stagger_2dadd_filelist"><strong>stagger-add</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Adds the file list to the end of the song queue, but only after rearranging it
+into a ``staggered'' order.  This staggered order is very similar the order created
+by the <strong>stagger</strong> command (described below).  Each element of the file list
+(before replacing directories with their contents) specifies a category into
+which the expanded file list will be divided.  The staggered order of the list
+being added is formed by taking the first item from each category in turn until
+all the categories are empty.  This may be a bit difficult to understand without
+an example, so here is a typical case:
+</dd>
+<dd>
+<p>Initially, the queue contains a few items.</p>
+</dd>
+<dd>
+<pre>
+    [0] /music/a.ogg
+    [1] /music/b.mp3
+    [2] /music/c.mid</pre>
+</dd>
+<dd>
+<p>Additionally, there are two directories that each contain a few files:</p>
+</dd>
+<dd>
+<pre>
+    $ ls /music/X/ /music/Y/
+    X:
+    1.ogg  2.ogg  3.ogg</pre>
+</dd>
+<dd>
+<pre>
+    Y:
+    1.ogg  2.ogg  3.ogg  4.ogg</pre>
+</dd>
+<dd>
+<p>After executing <code>moosic -o stagger-add /music/Y /music/X</code>, the queue now
+contains:</p>
+</dd>
+<dd>
+<pre>
+    [0] /music/a.ogg
+    [1] /music/b.mp3
+    [2] /music/c.mid
+    [3] /music/Y/1.ogg
+    [4] /music/X/1.ogg
+    [5] /music/Y/2.ogg
+    [6] /music/X/2.ogg
+    [7] /music/Y/3.ogg
+    [8] /music/X/3.ogg
+    [9] /music/Y/4.ogg</pre>
+</dd>
+<p></p>
+<dt><strong><a name="item_stagger_2dmerge_filelist"><strong>stagger-merge</strong> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Adds the given file list to the queue in an interleaved fashion.  More
+specifically, the new song queue will consist of a list that alternates between
+the items from the given file list and the items from the existing song queu.
+For example, if the queue initially contains:
+</dd>
+<dd>
+<pre>
+    [0] /music/a.ogg
+    [1] /music/b.mp3
+    [2] /music/c.mid</pre>
+</dd>
+<dd>
+<p>And the <em>/music/Y/</em> directory contains:</p>
+</dd>
+<dd>
+<pre>
+    1.ogg  2.ogg  3.ogg  4.ogg</pre>
+</dd>
+<dd>
+<p>Then, after executing <code>moosic -o stagger-merge /music/Y</code>, the queue will
+contain:</p>
+</dd>
+<dd>
+<pre>
+    [0] /music/Y/1.ogg
+    [1] /music/a.ogg
+    [2] /music/Y/2.ogg
+    [3] /music/b.mp3
+    [4] /music/Y/3.ogg
+    [5] /music/c.mid
+    [6] /music/Y/4.ogg</pre>
+</dd>
+<p></p>
+<dt><strong><a name="item_interval_2dadd_interval_filelist"><strong>interval-add</strong> <em>interval</em> <em>filelist</em></a></strong><br />
+</dt>
+<dd>
+Inserts the given songs into the current song queue with a regular frequency
+that is specified with the given <em>interval</em> argument (which must be an
+integer).
+</dd>
+<dd>
+<p>For example, if the queue initially contains:</p>
+</dd>
+<dd>
+<pre>
+    [0] /music/a.mod
+    [1] /music/b.mod
+    [2] /music/c.mod
+    [3] /music/d.mod
+    [4] /music/e.mod
+    [5] /music/f.mod
+    [6] /music/g.mod</pre>
+</dd>
+<dd>
+<p>And the <em>/music/Z</em> directory contains:</p>
+</dd>
+<dd>
+<pre>
+    aleph.wav  bet.wav  gimmel.wav</pre>
+</dd>
+<dd>
+<p>Then, after executing <code>moosic -o interval-add 3 /music/Z</code>, the queue will
+contain:</p>
+</dd>
+<dd>
+<pre>
+    [0] aleph.wav
+    [1] /music/a.mod
+    [2] /music/b.mod
+    [3] bet.wav
+    [4] /music/c.mod
+    [5] /music/d.mod
+    [6] gimmel.wav
+    [7] /music/e.mod
+    [8] /music/f.mod
+    [9] /music/g.mod</pre>
+</dd>
+<p></p></dl>
+<p>
+</p>
+<h2><a name="removing_from_the_song_queue">Removing from the song queue</a></h2>
+<p>These commands will remove from the queue of items to be played.</p>
+<dl>
+<dt><strong><a name="item_cut_range"><strong>cut</strong> <em>range</em></a></strong><br />
+</dt>
+<dd>
+Removes all song queue items that fall within the given range.
+</dd>
+<p></p>
+<dt><strong><a name="item_del_range"><strong>del</strong> <em>range</em></a></strong><br />
+</dt>
+<dd>
+An alias for ``cut''.
+</dd>
+<p></p>
+<dt><strong><a name="item_crop_range"><strong>crop</strong> <em>range</em></a></strong><br />
+</dt>
+<dd>
+Removes all song queue items that do not fall within the given range.
+</dd>
+<p></p>
+<dt><strong><a name="item_remove_regex__2e_2e_2e"><strong>remove</strong> <em>regex</em> ...</a></strong><br />
+</dt>
+<dd>
+Remove all song queue items that match the given regular expression.  If multiple
+regular expressions are given, any song that matches any one of the expressions
+will be removed.
+</dd>
+<p></p>
+<dt><strong><a name="item_filter_regex__2e_2e_2e"><strong>filter</strong> <em>regex</em> ...</a></strong><br />
+</dt>
+<dd>
+Remove all song queue items that do not match the given regular expression.  If
+multiple regular expressions are given, only those songs that match all the
+regular expressions will remain afterward.
+</dd>
+<p></p>
+<dt><strong><a name="item_clear"><strong>clear</strong></a></strong><br />
+</dt>
+<dd>
+Clear the song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_wipe"><strong>wipe</strong></a></strong><br />
+</dt>
+<dd>
+Clear the song queue and stop the current song.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<h2><a name="rearranging_the_song_queue">Rearranging the song queue</a></h2>
+<p>These commands let you change the order of the items in the queue.</p>
+<dl>
+<dt><strong><a name="item_move_range_index"><strong>move</strong> <em>range</em> <em>index</em></a></strong><br />
+</dt>
+<dd>
+Moves all items in the given range to a new position in the song queue.
+If you want to move items to the end of the queue, use <code>`moosic length`</code> as the
+final argument.  For example, to move the first 10 songs to the end of the
+queue, use the following command: <code>moosic move 0:10 `moosic length`</code>
+</dd>
+<p></p>
+<dt><strong><a name="item_move_2dpattern_regex_index"><strong>move-pattern</strong> <em>regex</em> <em>index</em></a></strong><br />
+</dt>
+<dd>
+Moves all items that match the given regular expression to a new position in
+the song queue.
+</dd>
+<p></p>
+<dt><strong><a name="item_swap_range_range"><strong>swap</strong> <em>range</em> <em>range</em></a></strong><br />
+</dt>
+<dd>
+Causes the songs contained within the two specified ranges to trade places.
+</dd>
+<p></p>
+<dt><strong><a name="item_reshuffle__5brange_5d"><strong>reshuffle</strong> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+Reshuffle the song queue.  If a range is specified, only items that fall within
+that range will be shuffled.
+</dd>
+<p></p>
+<dt><strong><a name="item_shuffle__5brange_5d"><strong>shuffle</strong> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+An alias for ``reshuffle''.
+</dd>
+<p></p>
+<dt><strong><a name="item_sort__5brange_5d"><strong>sort</strong> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+Rearrange the song queue in sorted order.  If a range is specified, only items
+that fall within that range will be sorted.
+</dd>
+<p></p>
+<dt><strong><a name="item_reverse__5brange_5d"><strong>reverse</strong> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+Reverse the order of the song queue.  If a range is specified, only items that
+fall within that range will be reversed.
+</dd>
+<p></p>
+<dt><strong><a name="item_partial_2dsort_regex__2e_2e_2e"><strong>partial-sort</strong> <em>regex</em> ...</a></strong><br />
+</dt>
+<dd>
+For each specified regular expression, the items in the song queue that match
+that expression are removed from the queue and gathered into their own list.
+All of these lists (plus the list of items that did not match any regular
+expression) are then stitched back together through simple concatenation.
+Finally, this unified list replaces the contents of the song queue.
+</dd>
+<dd>
+<p>The items that match a particular regular expression will remain in the same
+order with respect to each other.  Each group of matched items will appear in
+the reordered song queue in the order that the corresponding regular
+expressions were specified on the command line.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item_stagger_regex__2e_2e_2e"><strong>stagger</strong> <em>regex</em> ...</a></strong><br />
+</dt>
+<dd>
+For each specified regular expression, the items in the song queue that match
+that expression are removed from the queue and gathered into their own list.
+All of these lists are then merged together in a staggered fashion. All the
+leftover items (i.e. the ones that weren't matched by any regex on the command
+line) are appended to this unified list, which then replaces the contents of the
+song queue.
+</dd>
+<dd>
+<p>For example, if you use <code>moosic stagger red blue green</code> and the queue
+originally contains only names that either contain the string ``red'' or ``blue'' or
+``green'', then the members of the reordered queue will alternate between ``red''
+items, ``blue'' items, and ``green'' items.  If the queue does contain items that
+are neither ``red'' nor ``green'' nor ``blue'', then these will be collected and
+placed at the end of the queue, after all the ``red'', ``green'', and ``blue'' items.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item_sub_pattern_replacement__5brange_5d"><strong>sub</strong> <em>pattern</em> <em>replacement</em> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+Perform a regular expression substitution on all items in the song queue.  More
+precisely, this searches each queue item for the regular expression specified by
+the first argument, and replaces it with the text specified by the second
+argument.  Any backslash escapes in the replacement text will be processed,
+including special character translation (e.g. ``\n'' to newline) and
+backreferences to groups within the match.  If a range is given, then the
+substitution will only be applied to the items that fall within the range,
+instead of all items.  Only the first matching occurrence of the pattern is
+replaced in each item.
+</dd>
+<p></p>
+<dt><strong><a name="item_suball_pattern_replacement__5brange_5d"><strong>suball</strong> <em>pattern</em> <em>replacement</em> [<em>range</em>]</a></strong><br />
+</dt>
+<dd>
+This is identical to the ``sub'' command, except that all occurrences of the
+pattern within each queue item are replaced instead of just the first
+occurrence.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<h2><a name="general_management">General management</a></h2>
+<p>These commands affect the state of the Moosic server in various ways.</p>
+<dl>
+<dt><strong><a name="item_next__5bnumber_5d"><strong>next</strong> [<em>number</em>]</a></strong><br />
+</dt>
+<dd>
+Stops the current song (if any), and jumps ahead to a song that is currently in
+the queue.  The argument specifies the number of songs to be skipped, including
+the currently playing song.  Its default value is 1.  The skipped songs are
+recorded in the history as if they had been played.  If queue advancement is
+disabled, this command merely stops the current song and removes the appropriate
+number of songs from the queue, and does not cause a new song to be played.
+</dd>
+<p></p>
+<dt><strong><a name="item_previous__5bnumber_5d"><strong>previous</strong> [<em>number</em>]</a></strong><br />
+</dt>
+<dd>
+Retreats to a previously played song (from the history list) and begins playing
+it if queue advancement is enabled.  If a number is given as an argument, then
+the music daemon will retreat by that number of songs.  If no argument is given,
+then the music daemon will retreat to the most recent song in the history.  More
+precisely, this command stops the current song (without recording it in the song
+history) and returns the most recently played song or songs to the queue.  This
+command removes songs from the history when it returns them to the queue, thus
+modifying the song history.
+</dd>
+<dd>
+<p>When loop mode is on, this command retreats into the tail end of the queue
+instead of the song history.  This produces wrap-around behavior that you would
+expect from loop mode, and does not modify the song history.</p>
+</dd>
+<p></p>
+<dt><strong><a name="item_prev"><strong>prev</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``previous''.
+</dd>
+<p></p>
+<dt><strong><a name="item_goto_regex"><strong>goto</strong> <em>regex</em></a></strong><br />
+</dt>
+<dd>
+Jumps to the next song in the queue that matches the given regular expression.
+</dd>
+<p></p>
+<dt><strong><a name="item_gobackto_regex"><strong>gobackto</strong> <em>regex</em></a></strong><br />
+</dt>
+<dd>
+Jumps back to the most recent previous song that matches the given regular
+expression.
+</dd>
+<p></p>
+<dt><strong><a name="item_noadvance"><strong>noadvance</strong></a></strong><br />
+</dt>
+<dd>
+Tell the music daemon to stop playing any new songs, but without interrupting
+the current song.  In other words, this halts queue advancement.
+</dd>
+<p></p>
+<dt><strong><a name="item_noadv"><strong>noadv</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``noadvance''.
+</dd>
+<p></p>
+<dt><strong><a name="item_advance"><strong>advance</strong></a></strong><br />
+</dt>
+<dd>
+Tell the music daemon to resume queue advancement (i.e. play new songs when the
+current one is finished).  Obviously, this has no effect if queue advancement
+hasn't been disabled.
+</dd>
+<p></p>
+<dt><strong><a name="item_adv"><strong>adv</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``advance''.
+</dd>
+<p></p>
+<dt><strong><a name="item_toggle_2dadvance"><strong>toggle-advance</strong></a></strong><br />
+</dt>
+<dd>
+Halts queue advancement if it is enabled, and enables advancement if it is
+halted.
+</dd>
+<p></p>
+<dt><strong><a name="item_stop"><strong>stop</strong></a></strong><br />
+</dt>
+<dd>
+Tell the music daemon to stop playing the current song and stop processing the
+song queue.  The current song is put back into the song queue and is not
+recorded in the song history.
+</dd>
+<p></p>
+<dt><strong><a name="item_pause"><strong>pause</strong></a></strong><br />
+</dt>
+<dd>
+Suspend the current song so that it can be resumed at the exact same point at a
+later time.  Note: this often leaves the sound device locked.
+</dd>
+<p></p>
+<dt><strong><a name="item_unpause"><strong>unpause</strong></a></strong><br />
+</dt>
+<dd>
+Unpause the current song, if the current song is paused, otherwise do nothing.
+</dd>
+<p></p>
+<dt><strong><a name="item_play"><strong>play</strong></a></strong><br />
+</dt>
+<dd>
+Tell the music daemon to resume playing.  (Use after ``stop'', ``noadv'', or
+``pause''.)
+</dd>
+<p></p>
+<dt><strong><a name="item_loop"><strong>loop</strong></a></strong><br />
+</dt>
+<dd>
+Turn loop mode on.  When loop mode is on, songs are returned to the end of the
+queue when they finish playing instead of being thrown away.
+</dd>
+<p></p>
+<dt><strong><a name="item_noloop"><strong>noloop</strong></a></strong><br />
+</dt>
+<dd>
+Turn loop mode off.
+</dd>
+<p></p>
+<dt><strong><a name="item_toggle_2dloop"><strong>toggle-loop</strong></a></strong><br />
+</dt>
+<dd>
+Turn loop mode on if it is off, and turn it off if it is on.
+</dd>
+<p></p>
+<dt><strong><a name="item_reconfigure"><strong>reconfigure</strong></a></strong><br />
+</dt>
+<dd>
+Tell the music daemon to reload its configuration file.
+</dd>
+<p></p>
+<dt><strong><a name="item_reconfig"><strong>reconfig</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``reconfigure''.
+</dd>
+<p></p>
+<dt><strong><a name="item_showconfig"><strong>showconfig</strong></a></strong><br />
+</dt>
+<dd>
+Query and print the music daemon's filetype associations.
+</dd>
+<p></p>
+<dt><strong><a name="item_start_2dserver__5boptions_5d"><strong>start-server</strong> [<em>options</em>]</a></strong><br />
+</dt>
+<dd>
+Start a new instance of the music daemon (also known as <strong>moosicd</strong>).  If option
+arguments are given, they will be used as the options for invoking <strong>moosicd</strong>.
+The options that are accepted by <strong>moosicd</strong> can be found in its own manual page,
+<a href="././moosicd.html">the moosicd manpage</a>(1).
+</dd>
+<p></p>
+<dt><strong><a name="item_exit"><strong>exit</strong></a></strong><br />
+</dt>
+<dd>
+Tell the music daemon to quit.
+</dd>
+<p></p>
+<dt><strong><a name="item_quit"><strong>quit</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``exit''.
+</dd>
+<p></p>
+<dt><strong><a name="item_die"><strong>die</strong></a></strong><br />
+</dt>
+<dd>
+An alias for ``exit''.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="audio_cd_support">AUDIO CD SUPPORT</a></h1>
+<p>If you have the takcd program installed, and you have an appropriate entry for
+it in the Moosic server's player configuration, then you can play audio CD
+tracks with Moosic.  The following entry should be in <em>~/.moosic/config</em>:</p>
+<pre>
+    (?i)^cda://(\S*)
+    takcd \1</pre>
+<p>To put CD tracks into the song queue, you should name them with the prefix
+``cda://'', followed immediately by the number of the track you wish to play.  For
+example, <code>moosic -n add cda://3</code> will add the third track on the CD to the end
+of the song queue.</p>
+<p>The takcd program can be found at <a href="http://bard.sytes.net/takcd/">http://bard.sytes.net/takcd/</a>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="files">FILES</a></h1>
+<dl>
+<dt><strong><a name="item_socket"><em>socket</em></a></strong><br />
+</dt>
+<dd>
+This is a socket file which is used to allow Moosic clients to contact the
+Moosic server.  It is generally located in the <em>~/.moosic/</em> directory, unless
+<strong>moosicd</strong> was invoked with the <strong>-c</strong>/<strong>--config</strong> option.
+</dd>
+<p></p></dl>
+<p>
+</p>
+<hr />
+<h1><a name="see_also">SEE ALSO</a></h1>
+<p><a href="././moosicd.html">the moosicd manpage</a>(1), for details on invoking the Moosic server by hand.</p>
+<p>Various <strong>moosic</strong> commands accept regular expressions arguments.  The syntax
+used for these regular expressions is identical to the syntax used by Python's
+regular expression library.  The details of this syntax are explained in the
+chapter entitled ``Regular Expression Syntax''
+<a href="http://www.python.org/doc/current/lib/re-syntax.html">http://www.python.org/doc/current/lib/re-syntax.html</a> from the section dealing
+with the <strong>re</strong> module in the <em>Python Library Reference</em>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="author">AUTHOR</a></h1>
+<p>Daniel Pearson &lt;<a href="mailto:daniel@nanoo.org">daniel@nanoo.org</a>&gt;</p>
+
+</body>
+
+</html>
