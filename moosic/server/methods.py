@@ -29,8 +29,8 @@ API_MAJOR_VERSION = 1
 API_MINOR_VERSION = 8
 
 # Import from the standard library.
-import xmlrpclib, time, os, signal, random, re, errno, operator
-from xmlrpclib import Boolean, Binary, True, False
+import xmlrpc.client, time, os, signal, random, re, errno, operator
+from xmlrpc.client import Boolean, Binary, True, False
 
 # Define the True and False constants if they don't already exist.
 try: True
@@ -39,8 +39,8 @@ try: False
 except NameError: False = 0
 
 # Import from my own modules.
-import xmlrpc_registry
-from xmlrpc_registry import INT, BOOLEAN, DOUBLE, STRING, ARRAY, STRUCT, BASE64
+from . import xmlrpc_registry
+from .xmlrpc_registry import INT, BOOLEAN, DOUBLE, STRING, ARRAY, STRUCT, BASE64
 import moosic.utilities
 from moosic.utilities import grep, antigrep, splitpath, is_overlapping
 import moosic.server.support
@@ -69,7 +69,7 @@ def insert(items, position):
     p = position  # Make a shorter alias so that we can fit into 80 colums.
     data.lock.acquire()
     try:
-        data.song_queue[p:p] = filter(None, [str(i.data) for i in items])
+        data.song_queue[p:p] = [_f for _f in [str(i.data) for i in items] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -96,7 +96,7 @@ def replace(items):
                             i.__class__.__name__)
     data.lock.acquire()
     try:
-        data.song_queue = filter(None, [str(i.data) for i in items])
+        data.song_queue = [_f for _f in [str(i.data) for i in items] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -132,7 +132,7 @@ def replace_range(range, items):
                             i.__class__.__name__)
     data.lock.acquire()
     try:
-        data.song_queue[start:end] = filter(None, [str(i.data) for i in items])
+        data.song_queue[start:end] = [_f for _f in [str(i.data) for i in items] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -211,8 +211,8 @@ def sub_all(pattern, replace, range=()):
     pattern = re.compile(pattern)
     data.lock.acquire()
     try:
-        data.song_queue[start:end] = filter(None, [pattern.sub(replace, item)
-                                      for item in data.song_queue[start:end]])
+        data.song_queue[start:end] = [_f for _f in [pattern.sub(replace, item)
+                                      for item in data.song_queue[start:end]] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -247,8 +247,8 @@ def sub(pattern, replace, range=()):
     pattern = re.compile(pattern)
     data.lock.acquire()
     try:
-        data.song_queue[start:end] = filter(None, [pattern.sub(replace, item, 1)
-                                      for item in data.song_queue[start:end]])
+        data.song_queue[start:end] = [_f for _f in [pattern.sub(replace, item, 1)
+                                      for item in data.song_queue[start:end]] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -496,7 +496,7 @@ def pause():
                 os.kill(data.player_pid, signal.SIGTSTP)
                 time.sleep(0.10)
                 os.kill(data.player_pid, signal.SIGSTOP)
-            except OSError, e:
+            except OSError as e:
                 e.strerror += ' (in method "pause")'
                 raise e
             if data.paused == False:
@@ -520,7 +520,7 @@ def unpause():
         if data.current_song and data.player_pid:
             try:
                 os.kill(data.player_pid, signal.SIGCONT)
-            except OSError, e:
+            except OSError as e:
                 if e.errno == errno.ESRCH:
                     data.player_pid = None
                 else:
@@ -637,7 +637,7 @@ def skip():
                 os.kill(data.player_pid, signal.SIGINT)
             else:
                 os.kill(data.player_pid, signal.SIGTERM)
-        except OSError, e:
+        except OSError as e:
             e.strerror += ' (in method "skip")'
             raise e
         # Unpause the song player, so that termination takes place right away
@@ -1148,7 +1148,7 @@ def reconfigure():
             data.config = moosic.server.support.readConfig(data.conffile)
         finally:
             data.lock.release()
-    except IOError, e:
+    except IOError as e:
         data.log(Log.ERROR,
             "The configuration file could not be reloaded!\n" +
             "%s: %s" % (data.conffile, e))

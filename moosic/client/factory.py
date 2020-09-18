@@ -40,7 +40,7 @@ XML-RPC client implementation for use with Unix sockets.
 It is safe to "import *" from this module.
 """
 
-import xmlrpclib, urllib, httplib, socket, os, os.path, sys
+import xmlrpc.client, urllib.request, urllib.parse, urllib.error, http.client, socket, os, os.path, sys
 import moosic.server.main
 
 # Define the True and False constants if they don't already exist.
@@ -54,7 +54,7 @@ __all__ = ('startServer', 'LocalMoosicProxy', 'UnixMoosicProxy',
            'InetMoosicProxy', 'UnixStreamTransport')
 
 
-class UnixStreamTransport(xmlrpclib.Transport):
+class UnixStreamTransport(xmlrpc.client.Transport):
     '''An adapter for speaking HTTP over a Unix socket instead of a TCP/IP socket.
 
     This class mainly exists to serve as a helper for implementing the
@@ -62,22 +62,22 @@ class UnixStreamTransport(xmlrpclib.Transport):
     client developers.
     '''
     def make_connection(self, host):
-        class HTTPConnection(httplib.HTTPConnection):
+        class HTTPConnection(http.client.HTTPConnection):
             def connect(self):
-                host = urllib.unquote(self.host)
+                host = urllib.parse.unquote(self.host)
                 try:
                     self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                     if self.debuglevel > 0:
-                        print "connect: (%s)" % host
+                        print("connect: (%s)" % host)
                     self.sock.connect(host)
-                except socket.error, msg:
+                except socket.error as msg:
                     if self.debuglevel > 0:
-                        print 'connect fail:', host
+                        print('connect fail:', host)
                     if self.sock:
                         self.sock.close()
                     self.sock = None
                     raise
-        class HTTP(httplib.HTTP):
+        class HTTP(http.client.HTTP):
             _connection_class = HTTPConnection
         # Older versions of xmlrpclib.Transport use the deprecated httplib.HTTP
         # class, while newer versions use httplib.HTTPConnection.
@@ -97,8 +97,8 @@ def LocalMoosicProxy(filename=None):
 
     if not filename:
         filename = os.path.join(os.getenv('HOME', '/tmp'), '.moosic', 'socket')
-    server_address = 'http://%s/' % urllib.quote(filename, safe='')
-    return xmlrpclib.ServerProxy(uri=server_address,
+    server_address = 'http://%s/' % urllib.parse.quote(filename, safe='')
+    return xmlrpc.client.ServerProxy(uri=server_address,
                                  transport=UnixStreamTransport(),
                                  verbose=False)
 
@@ -116,7 +116,7 @@ def InetMoosicProxy(host, port):
     is located. The second argument, "port", is the TCP port that the server is
     listening to.
     '''
-    return xmlrpclib.ServerProxy(uri='http://%s:%d/' % (host, port),
+    return xmlrpc.client.ServerProxy(uri='http://%s:%d/' % (host, port),
                                  verbose=False)
 
 
@@ -133,7 +133,7 @@ def startServer(*argv):
     status = None
     try:
         moosic.server.main.main(argv)
-    except SystemExit, e:
+    except SystemExit as e:
         status = e[0]
         if not status:
             status = None

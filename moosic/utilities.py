@@ -34,8 +34,9 @@ potentially useful in a wide range of programming tasks.
 It is safe to "import *" from this module.
 """
 
-from __future__ import generators
+
 import re, random, string, operator, os, os.path
+from functools import reduce
 
 
 __all__ = ('grep', 'antigrep', 'staggered_merge', 'parse_range', 'wrap',
@@ -101,7 +102,7 @@ def shuffle(seq):
     shuffled = []
     seq = list(seq)
     while seq:
-        shuffled.append( seq.pop( random.choice( range( len(seq) ) ) ) )
+        shuffled.append( seq.pop( random.choice( list(range( len(seq))) ) ) )
     return shuffled
 
 
@@ -123,19 +124,19 @@ def staggered_merge_old(*sequences):
     # element is the empty tuple.
     sequences = sequences or ((),)
     # step 3: filter out the "None" values.
-    return filter(
+    return list(filter(
         (lambda x: x is not None),
         # step 2: concatenate the tuples together.
         reduce(
             operator.concat,
             # step 1: collect the corresponding elements into a list of tuples.
-            map(*((None,) + sequences)),
+            list(map(*((None,) + sequences))),
                 # The argument list for map() must be built dynamically because
                 # map() takes a variable number of arguments, and we want each
                 # member of "sequences" to be a separate argument to map().
             ()
         )
-    )
+    ))
     # The astute reader might exclaim here that I could have used the builtin
     # zip() function instead of using map() with the identity function.
     # However, zip() truncates all sequences that are longer than the shortest
@@ -216,7 +217,7 @@ def parse_range(range, start=0, end=0):
     ValueError will be thrown.
     '''
     if not range:
-        raise ValueError, 'Invalid range: empty string.'
+        raise ValueError('Invalid range: empty string.')
     if not (range[0].isdigit() or range[0] in ('-', ':')):
         range = range[1:]
     if not (range[-1].isdigit() or range[-1] in ('-', ':')):
@@ -230,16 +231,16 @@ def parse_range(range, start=0, end=0):
             if b:
                 end = int(b)
         except ValueError:
-            raise ValueError, 'Invalid range (non-integer value): "%s".' % range
+            raise ValueError('Invalid range (non-integer value): "%s".' % range)
     elif colon_count == 0:
         try:
             start = int(range)
         except ValueError:
-            raise ValueError, 'Invalid range (non-integer value): "%s".' % range
+            raise ValueError('Invalid range (non-integer value): "%s".' % range)
         if (start + 1) != 0:
             end = start + 1
     else:
-        raise ValueError, 'Invalid range (wrong number of colons): "%s".' % range
+        raise ValueError('Invalid range (wrong number of colons): "%s".' % range)
     return start, end
 
 

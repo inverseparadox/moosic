@@ -26,7 +26,7 @@
 # For more information, please refer to <http://unlicense.org/>
 
 import sys, os, os.path, string, threading, time, socket, traceback, errno
-import SocketServer, SimpleXMLRPCServer
+import socketserver, xmlrpc.server
 
 # Define the True and False constants if they don't already exist.
 try: True
@@ -255,8 +255,8 @@ def getConfigFile(confdir):
     conffile = os.path.join(confdir, 'config')
     if not os.path.exists(confdir):
         try:
-            os.makedirs(confdir, 0700)
-        except IOError, e:
+            os.makedirs(confdir, 0o700)
+        except IOError as e:
             sys.exit('Error creating directory "%s": %s' % (confdir, e.strerror))
     if not os.path.exists(conffile):
         try:
@@ -303,7 +303,7 @@ moosic -o pl-add
 (?i)^cda://(\S+)
 takcd \1''' % conffile)
             f.close()
-        except IOError, e:
+        except IOError as e:
             sys.exit('Error creating configuration file "%s": %s' % (conffile, e))
     if not os.path.isfile(conffile):
         sys.exit('Error: "%s" exists, but is not a regular file.\n'
@@ -384,7 +384,7 @@ class Log:
         return orig_message
 
 
-class UnixMoosicRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+class UnixMoosicRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
     """An adaptation of SimpleXMLRPCRequestHandler for use with Unix sockets.
     """
     # The Nagle algorithm issue doesn't apply to non-TCP sockets.
@@ -402,22 +402,22 @@ class UnixMoosicRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
         return self.client_address
 
 
-class TcpMoosicRequestHandler(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+class TcpMoosicRequestHandler(xmlrpc.server.SimpleXMLRPCRequestHandler):
     """An adaptation of SimpleXMLRPCRequestHandler for use with TCP sockets.
     """
     # Actually, no adaptation needs to be done.
     pass
 
 
-class UnixMoosicServer(SocketServer.UnixStreamServer,
-                       SimpleXMLRPCServer.SimpleXMLRPCServer):
+class UnixMoosicServer(socketserver.UnixStreamServer,
+                       xmlrpc.server.SimpleXMLRPCServer):
     """A server that responds to Moosic requests via a Unix (local) socket.
     """
     # Portability note: By default, Unix domain sockets are used to implement
     # interprocess communication between the client and the server. This prevents
     # this program from working on (most, if not all) non-Unix systems.
     def __init__(self, addr, logRequests=False):
-        SimpleXMLRPCServer.SimpleXMLRPCServer.__init__(self, addr,
+        xmlrpc.server.SimpleXMLRPCServer.__init__(self, addr,
                 requestHandler=UnixMoosicRequestHandler,
                 logRequests=logRequests)
 
@@ -426,11 +426,11 @@ class UnixMoosicServer(SocketServer.UnixStreamServer,
         log_exception(request, client_address)
 
 
-class TcpMoosicServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
+class TcpMoosicServer(xmlrpc.server.SimpleXMLRPCServer):
     """A server that responds to Moosic requests via TCP/IP.
     """
     def __init__(self, addr, logRequests=False):
-        SimpleXMLRPCServer.SimpleXMLRPCServer.__init__(self, addr,
+        xmlrpc.server.SimpleXMLRPCServer.__init__(self, addr,
                 requestHandler=TcpMoosicRequestHandler,
                 logRequests=logRequests)
 
@@ -439,16 +439,16 @@ class TcpMoosicServer(SimpleXMLRPCServer.SimpleXMLRPCServer):
         log_exception(request, client_address)
 
 
-class ThreadedUnixMoosicServer(SocketServer.ThreadingMixIn,
-                       SocketServer.UnixStreamServer,
-                       SimpleXMLRPCServer.SimpleXMLRPCServer):
+class ThreadedUnixMoosicServer(socketserver.ThreadingMixIn,
+                       socketserver.UnixStreamServer,
+                       xmlrpc.server.SimpleXMLRPCServer):
     """A server that responds to Moosic requests via a Unix (local) socket.
     """
     # Portability note: By default, Unix domain sockets are used to implement
     # interprocess communication between the client and the server. This prevents
     # this program from working on (most, if not all) non-Unix systems.
     def __init__(self, addr, logRequests=False):
-        SimpleXMLRPCServer.SimpleXMLRPCServer.__init__(self, addr,
+        xmlrpc.server.SimpleXMLRPCServer.__init__(self, addr,
                 requestHandler=UnixMoosicRequestHandler,
                 logRequests=logRequests)
 
@@ -476,12 +476,12 @@ class ThreadedUnixMoosicServer(SocketServer.ThreadingMixIn,
         log_exception(request, client_address)
 
 
-class ThreadedTcpMoosicServer(SocketServer.ThreadingMixIn,
-                      SimpleXMLRPCServer.SimpleXMLRPCServer):
+class ThreadedTcpMoosicServer(socketserver.ThreadingMixIn,
+                      xmlrpc.server.SimpleXMLRPCServer):
     """A server that responds to Moosic requests via TCP/IP.
     """
     def __init__(self, addr, logRequests=False):
-        SimpleXMLRPCServer.SimpleXMLRPCServer.__init__(self, addr,
+        xmlrpc.server.SimpleXMLRPCServer.__init__(self, addr,
                 requestHandler=TcpMoosicRequestHandler,
                 logRequests=logRequests)
 

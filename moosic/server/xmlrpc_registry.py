@@ -26,7 +26,7 @@
 # SUCH DAMAGE.
 
 import sys
-import xmlrpclib
+import xmlrpc.client
 
 # Some type names for use in method signatures.
 INT="int"
@@ -112,7 +112,7 @@ class Registry:
 
         try:
             # Try to find our method.
-            if self._methods.has_key(name):
+            if name in self._methods:
                 method = self._methods[name]
             else:
                 method = self._default_method
@@ -120,12 +120,12 @@ class Registry:
                 return self._no_such_method(name)
 
             # Call our method and return the result.
-            return apply(method, params)
+            return method(*params)
        #except:                     # DEBUG
        #    import traceback        #
        #    traceback.print_exc()   #
        #    raise                   #
-        except xmlrpclib.Fault, f:
+        except xmlrpc.client.Fault as f:
             if f.faultCode == TYPE_ERROR:
                 raise TypeError(f.faultString)
             elif f.faultCode == INDEX_ERROR:
@@ -140,13 +140,13 @@ class Registry:
 
     def _no_such_method (self, name):
         """Raise a no-such-method error."""
-        raise xmlrpclib.Fault(NO_SUCH_METHOD_ERROR,
+        raise xmlrpc.client.Fault(NO_SUCH_METHOD_ERROR,
                               "Method '%s' not found" % (name))
 
     def _introspection_check (self):
         """Raise an error if introspection is disabled."""
         if not self._allow_introspection:
-            raise xmlrpclib.Fault(INTROSPECTION_DISABLED_ERROR,
+            raise xmlrpc.client.Fault(INTROSPECTION_DISABLED_ERROR,
                                   ("Introspection has been disabled on this " +
                                    "server, probably for security reasons."))
     
@@ -154,7 +154,7 @@ class Registry:
         """Return an array of all available XML-RPC methods on this server.
         """
         self._introspection_check()
-        return self._methods.keys()
+        return list(self._methods.keys())
 
     def system_methodSignature (self, name):
         """Given the name of a method, return an array of legal signatures. Each
@@ -162,7 +162,7 @@ class Registry:
         the return type, and any others items are parameter types.
         """
         self._introspection_check()
-        if self._signatures.has_key(name):
+        if name in self._signatures:
             return self._signatures[name]
         else:
             self._no_such_method(name)
@@ -171,7 +171,7 @@ class Registry:
         """Given the name of a method, return a help string.
         """
         self._introspection_check()
-        if self._help.has_key(name):
+        if name in self._help:
             return self._help[name]
         else:
             self._no_such_method(name)
@@ -191,13 +191,13 @@ class Registry:
                 params = call['params']
                 if name == 'system.multicall':
                     errmsg = "Recursive system.multicall forbidden"
-                    raise xmlrpclib.Fault(REQUEST_REFUSED_ERROR, errmsg)
+                    raise xmlrpc.client.Fault(REQUEST_REFUSED_ERROR, errmsg)
                 result = [self.dispatch_call(name, params)]
-            except xmlrpclib.Fault, fault:
+            except xmlrpc.client.Fault as fault:
                 result = {'faultCode': fault.faultCode,
                           'faultString': fault.faultString}
             except:
-                errmsg = "%s:%s" % (sys.exc_type, sys.exc_value)
+                errmsg = "%s:%s" % (sys.exc_info()[0], sys.exc_info()[1])
                 result = {'faultCode': 1, 'faultString': errmsg}
             results.append(result)
         return results

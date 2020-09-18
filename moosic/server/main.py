@@ -27,7 +27,7 @@
 
 import sys, os, os.path, string, time, threading, re
 import socket, signal, atexit
-import cPickle as pickle
+import pickle as pickle
 from moosic import VERSION
 from moosic.server.daemonize import daemonize
 
@@ -79,7 +79,7 @@ from moosic.server.support import *
 def request_handler(server):
     try:
         server.serve_forever()
-    except socket.error, e:
+    except socket.error as e:
         data.quitFlag = True  # Tell the queue consumer to quit.
         import errno
         if e[0] == errno.EINTR:
@@ -144,14 +144,14 @@ def play(config, songname):
             os.dup2(logfile.fileno(), sys.__stderr__.fileno())
             # Capture the program's standard output stream.
             os.dup2(logfile.fileno(), sys.__stdout__.fileno())
-        except IOError, e:
+        except IOError as e:
             data.log(Log.ERROR,
               'Cannot open player log file "%s": %s' % (e.songname, e.strerror))
         # Execute the command.
         try:
             os.execvp(command[0], command)
-        except StandardError, e:
-            print 'Could not execute "%s": %s' % (' '.join(command), e)
+        except Exception as e:
+            print('Could not execute "%s": %s' % (' '.join(command), e))
     else:
         os.waitpid(data.player_pid, 0)
         data.player_pid = None
@@ -223,11 +223,11 @@ def handleOptions(argv, defaultOpts):
         options, arglist = getopt.getopt(argv, 'hvqds:c:St:T:fl', ['help',
                 'version', 'quiet', 'debug', 'history-size=', 'config=',
                 'stdout', 'tcp=', 'tcp-also=', 'foreground', 'local-only'])
-    except getopt.GetoptError, e:
+    except getopt.GetoptError as e:
         sys.exit('Option processing error: %s' % e)
     for opt, val in options:
         if opt == '-h' or opt == '--help':
-            print 'usage:', os.path.basename(argv[0]), '[options]' + '''
+            print('usage:', os.path.basename(argv[0]), '[options]' + '''
     Options:
         -s, --history-size <num> Sets the maximum size of the history list.
                                  (Default: 50)
@@ -256,14 +256,14 @@ def handleOptions(argv, defaultOpts):
                             itself in the background and detaching from the
                             current terminal.
         -v, --version       Print version information and exit.
-        -h, --help          Print this help text and exit.'''
+        -h, --help          Print this help text and exit.''')
             sys.exit(0)
         if opt == '-v' or opt == '--version':
-            print "moosicd", VERSION
-            print """
+            print("moosicd", VERSION)
+            print("""
 Copyright (C) 2001-2003 Daniel Pearson <daniel@nanoo.org>
 This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.""")
             sys.exit(0)
         if opt == '-q' or opt == '--quiet':
             opts['verbosity'] = Log.ERROR
@@ -272,8 +272,8 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
         if opt == '-s' or opt == '--history-size':
             try:
                 opts['max hist size'] = int(val)
-            except ValueError, e:
-                print 'Warning: %s. This option has been ignored.' % e
+            except ValueError as e:
+                print('Warning: %s. This option has been ignored.' % e)
         if opt == '-c' or opt == '--config':
             opts['confdir'] = os.path.abspath(val)
         if opt == '-S' or opt == '--stdout':
@@ -286,19 +286,19 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
                 opts['tcp-port'] = int(val)
                 opts['ip-socket'] = True
                 opts['unix-socket'] = False
-            except ValueError, e:
-                print 'Warning: %s. This option has been ignored.' % e
+            except ValueError as e:
+                print('Warning: %s. This option has been ignored.' % e)
         if opt == '-T' or opt == '--tcp-also':
             try:
                 opts['tcp-port'] = int(val)
                 opts['ip-socket'] = True
                 opts['unix-socket'] = True
-            except ValueError, e:
-                print 'Warning: %s. This option has been ignored.' % e
+            except ValueError as e:
+                print('Warning: %s. This option has been ignored.' % e)
         if opt == '-l' or opt == '--local-only':
             opts['local-only'] = True
     if arglist:
-        print 'Warning: non-option command line arguments are ignored.'
+        print('Warning: non-option command line arguments are ignored.')
     return opts
 
 
@@ -324,7 +324,7 @@ def main(argv):
     data.conffile = getConfigFile(data.confdir)
     try:
         data.config = readConfig(data.conffile)
-    except IOError, e:
+    except IOError as e:
         sys.exit('Error reading configuration file "%s": %s' % (data.conffile, e))
 
     # Initialize the logging system.
@@ -338,7 +338,7 @@ def main(argv):
         else:
             buffering = 1  # Use line-buffered output.
             logfile = open(logfilename, 'w', buffering)
-    except IOError, e:
+    except IOError as e:
         sys.exit('Cannot open server log file "%s": %s' % (logfilename, e.strerror))
     data.log = Log(logfile, options['verbosity'])
     data.log(Log.NOTICE, "Starting up.")
@@ -348,10 +348,10 @@ def main(argv):
     if os.path.exists(savefilename):
         try:
             data.setstate(pickle.load(open(savefilename)))
-        except IOError, e:
+        except IOError as e:
             data.log(Log.WARNING,
               'Cannot open saved-state file "%s": %s' % (e.filename,e.strerror))
-        except pickle.PickleError, e:
+        except pickle.PickleError as e:
             data.log(Log.WARNING,
               'Unpickling error: %s\nCannot load saved state.' % (e))
         except:
@@ -367,7 +367,7 @@ def main(argv):
         server_addr = os.path.join(data.confdir, 'socket')
         try:
             data.moosic_server = UnixMoosicServer(server_addr)
-        except socket.error, e:
+        except socket.error as e:
             import errno
             if e[0] == errno.EADDRINUSE:
                 try:
@@ -378,7 +378,7 @@ def main(argv):
                     sys.exit(data.log(Log.ERROR,
                         "Error: Tried to start a new moosicd, but an instance "
                         "of moosicd is already running."))
-                except socket.error, e:
+                except socket.error as e:
                     # The socket file at our desired address exists, but it
                     # isn't actually being used by a Moosic server, so we'll
                     # assume that this socket file is stale and remove it.
@@ -388,7 +388,7 @@ def main(argv):
                     # Try to instantiate UnixMoosicServer again.
                     try:
                         data.moosic_server = UnixMoosicServer(server_addr)
-                    except socket.error, e:
+                    except socket.error as e:
                         # If we still get an error, it's time to give up. We've
                         # done the best we can do.
                         sys.exit(data.log(Log.ERROR,
@@ -405,7 +405,7 @@ def main(argv):
             server_addr = ('', options['tcp-port'])
         try:
             data.extra_moosic_server = TcpMoosicServer(server_addr)
-        except socket.error, e:
+        except socket.error as e:
             import errno
             if e[0] == errno.EADDRINUSE:
                 try:
@@ -415,7 +415,7 @@ def main(argv):
                     # really is a server using this socket address.
                     sys.exit(data.log(Log.ERROR, "A server is already running "
                         "on port %d" % options['tcp-port']))
-                except socket.error, e:
+                except socket.error as e:
                     sys.exit(data.log(Log.ERROR,
                         "localhost:%d is somehow in use already, but I cannot "
                         "contact a server at that address." % options['tcp-port']))
@@ -445,11 +445,11 @@ def main(argv):
         try:
             savefilename = os.path.join(data.confdir, 'saved_state')
             pickle.dump(data.getstate(), open(savefilename, 'w'))
-        except IOError, e:
+        except IOError as e:
             data.log(Log.WARNING,
               'Cannot open saved-state file "%s" for writing: %s' %
               (e.filename, e.strerror))
-        except PicklingError, e:
+        except PicklingError as e:
             data.log(Log.WARNING,
               'Pickling error: %s\nCannot save state.' % (e))
 

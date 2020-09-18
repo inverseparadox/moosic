@@ -25,7 +25,7 @@
 # 
 # For more information, please refer to <http://unlicense.org/>
 
-import sys, socket, os, os.path, getopt, xmlrpclib, errno, time, locale, re
+import sys, socket, os, os.path, getopt, xmlrpc.client, errno, time, locale, re
 
 from moosic import VERSION
 from moosic.utilities import *
@@ -125,10 +125,10 @@ def main(argv):
                          'S':'showcommands',
                          'h':'help',
                          'v':'version', }
-            short_opts = ''.join(opt_spec.keys())
-            long_opts = opt_spec.values()
+            short_opts = ''.join(list(opt_spec.keys()))
+            long_opts = list(opt_spec.values())
             options, arglist = getopt.getopt(arglist, short_opts, long_opts)
-        except getopt.error, e:
+        except getopt.error as e:
             sys.exit('Option processing error: %s' % e)
         for option, val in options:
             if option == '-d' or option == '--shuffle-dir':
@@ -173,7 +173,7 @@ def main(argv):
                 host, port = val.split(':', 1)
                 try:
                     port = int(port)
-                except ValueError, e:
+                except ValueError as e:
                     sys.exit("Invalid port number: %s" % port)
                 opts['tcp-address'] = (host, port)
             if option == '-N' or option == '--no-startserver':
@@ -183,17 +183,17 @@ def main(argv):
             if option == '-C' or option == '--current-in-list':
                 opts['current-in-list'] = True
             if option == '-S' or option == '--showcommands':
-                print COMMANDS
+                print(COMMANDS)
                 sys.exit(0)
             if option == '-h' or option == '--help':
-                print USAGE
+                print(USAGE)
                 sys.exit(0)
             if option == '-v' or option == '--version':
-                print "moosic", VERSION
-                print """
+                print("moosic", VERSION)
+                print("""
 Copyright (C) 2001-2003 Daniel Pearson <daniel@nanoo.org>
 This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.""")
                 sys.exit(0)
         return arglist, opts
 
@@ -250,15 +250,15 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
     try:
         if command != 'startserver': # unless the user is starting it explicitly
             moosic.no_op()
-    except socket.error, e:
+    except socket.error as e:
         if e[0] in (errno.ECONNREFUSED, errno.ENOENT):
             # The server doesn't seem to be running, so let's try to start it
             # for ourselves.
             if opts['tcp-address']:
                 failure_reason = "The target Moosic server is on a remote computer."
             elif opts['start moosicd']:
-                print >>err, "Notice: The Moosic server isn't running, so it " \
-                             "is being started automatically."
+                print("Notice: The Moosic server isn't running, so it " \
+                             "is being started automatically.", file=err)
                 failure_reason = startServer('moosicd', '-c', opts['config-dir'])
             else:
                 failure_reason = "Automatic launching of the server is disabled."
@@ -272,7 +272,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
                 # Test the server connection again.
                 try:
                     moosic.no_op()
-                except Exception, e:
+                except Exception as e:
                     # We tried our best. Finally give up.
                     sys.exit("An attempt was made to start the Moosic "
                              "server, but it still can't be contacted.\n"
@@ -283,20 +283,20 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."""
     try:
         # Dispatch the command.
         exit_status = dispatcher[command](moosic, arglist, opts)
-    except socket.error, e:
+    except socket.error as e:
         exit_status = "Socket error: %s" % e[1]
-    except xmlrpclib.Fault, e:
+    except xmlrpc.client.Fault as e:
         if ':' in e.faultString:
             fault_type, fault_msg = e.faultString.split(':', 1)
             fault_type = fault_type.split('.')[-1]
             exit_status = "Error from Moosic server: [%s] %s" % (fault_type, fault_msg)
         else:
             exit_status = "Error from Moosic server: %s" % e.faultString
-    except xmlrpclib.ProtocolError, e:
+    except xmlrpc.client.ProtocolError as e:
         exit_status = "RPC protocol error: %s %s." % (e.errcode, e.errmsg)
-    except ValueError, e:
+    except ValueError as e:
         exit_status = "Error: %s" % e
-    except Exception, e:
+    except Exception as e:
         if isinstance(e, SystemExit):
             raise e
         else:

@@ -9,14 +9,14 @@ if len(sys.argv) < 2:
 else:
     server_proxy = LocalMoosicProxy(sys.argv[1])
 
-items = xmlrpc_server_doc(server_proxy).items()
+items = list(xmlrpc_server_doc(server_proxy).items())
 items.sort()
-print
-print '=over'
-print
+print()
+print('=over')
+print()
 for i in items:
     if not i[0].startswith('_'):
-        print i[1], "\n"
-print
-print '=back'
-print
+        print(i[1], "\n")
+print()
+print('=back')
+print()

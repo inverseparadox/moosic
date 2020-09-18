@@ -29,7 +29,7 @@
 __all__ = ("dispatcher", "command_categories", "get_command_docs", "check_args")
 
 import base64, fileinput, sys, os, os.path, time, re
-import xmlrpclib, random, errno, string
+import xmlrpc.client, random, errno, string
 
 from moosic.utilities import *
 from moosic.client.factory import startServer
@@ -115,42 +115,35 @@ def check_args(command, arglist):
     # Check the number of arguments given to the command.
     if dispatcher[command].num_args not in ("zero", "zero_or_one", "zero_or_many"):
         if not arglist:
-            print >>err, \
-                'Error: the "%s" command requires at least one argument.' % command
+            print('Error: the "%s" command requires at least one argument.' % command, file=err)
             return False
 
     if dispatcher[command].num_args == "zero":
         if arglist:
-            print >>err, \
-                'Warning: the "%s" command doesn\'t take any arguments.' % command
-            print >>err, 'The given arguments will be ignored.'
+            print('Warning: the "%s" command doesn\'t take any arguments.' % command, file=err)
+            print('The given arguments will be ignored.', file=err)
 
     elif dispatcher[command].num_args == "one":
         if len(arglist) != 1:
-            print >>err, \
-                'Warning: the "%s" command takes only one argument.' % command
-            print >>err, 'Extraneous arguments beyond the first will be ignored.'
+            print('Warning: the "%s" command takes only one argument.' % command, file=err)
+            print('Extraneous arguments beyond the first will be ignored.', file=err)
 
     elif dispatcher[command].num_args == "zero_or_one":
         if len(arglist) > 1:
-            print >>err, \
-                'Warning: the "%s" command takes at most one argument.' % command
-            print >>err, 'Extraneous arguments beyond the first will be ignored.'
+            print('Warning: the "%s" command takes at most one argument.' % command, file=err)
+            print('Extraneous arguments beyond the first will be ignored.', file=err)
 
     elif dispatcher[command].num_args == "two":
         if len(arglist) != 2:
-            print >>err, \
-                'Error: the "%s" command requires exactly two arguments.' % command
+            print('Error: the "%s" command requires exactly two arguments.' % command, file=err)
             return False
 
     elif dispatcher[command].num_args == "two_or_three":
         if len(arglist) > 3:
-            print >>err, \
-                'Warning: the "%s" command takes at most three arguments.' % command
-            print >>err, 'Extraneous arguments beyond the third will be ignored.'
+            print('Warning: the "%s" command takes at most three arguments.' % command, file=err)
+            print('Extraneous arguments beyond the third will be ignored.', file=err)
         if len(arglist) < 2:
-            print >>err, \
-                'Error: the "%s" command requires at least two arguments.' % command
+            print('Error: the "%s" command requires at least two arguments.' % command, file=err)
             return False
 
     # Pluck off the "index" argument to the insert and pl-insert commands
@@ -163,13 +156,12 @@ def check_args(command, arglist):
             if not (index[-1].isdigit() or index[-1] == '-'):
                 index = index[:-1]
             dispatcher['insert'].position = int(index)
-        except ValueError, e:
-            print >>err, "Error:", e
-            print >>err, "An integer is required as the final argument."
+        except ValueError as e:
+            print("Error:", e, file=err)
+            print("An integer is required as the final argument.", file=err)
             return False
         if not arglist:
-            print >>err, \
-                'Error: the "%s" command needs something to insert.' % command
+            print('Error: the "%s" command needs something to insert.' % command, file=err)
             return False
     return True
 
@@ -251,8 +243,8 @@ def process_filelist(moosic, arglist, opts):
     # relative pathnames would be foolish because the server has no idea
     # what our current working directory is.
     if opts['file-munge']:
-        arglist = map(os.path.expanduser, arglist)
-        arglist = map(os.path.abspath, arglist)
+        arglist = list(map(os.path.expanduser, arglist))
+        arglist = list(map(os.path.abspath, arglist))
     if opts['shuffle-args']:
         random.shuffle(arglist)
     # If an item in the filelist is a directory, then recurse through the
@@ -292,11 +284,10 @@ def process_filelist(moosic, arglist, opts):
 def start_server(moosic, arglist, opts):
     "start-server [server-options] - Start the server when it isn't already running."
     if opts['tcp-address']:
-        print >>sys.stderr, \
-                wrap("Warning: the Moosic server is being started on the local "
+        print(wrap("Warning: the Moosic server is being started on the local "
                      "computer, even though you specified the -t option, which "
                      "usually causes this client to interact with a server on "
-                     "a remote computer. This is probably not what you want.")
+                     "a remote computer. This is probably not what you want."), file=sys.stderr)
     if not arglist:
         arglist = ['-c', opts['config-dir']]
     return startServer(*(['moosicd'] + arglist))
@@ -311,7 +302,7 @@ dispatcher[unmangle(f.__name__)] = f
 def append(moosic, arglist, opts):
     'append <filelist> - Add files to the end of the song queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     moosic.append(arglist)
 
 f = append
@@ -358,7 +349,7 @@ dispatcher[unmangle(f.__name__)] = f
 def prepend(moosic, arglist, opts):
     'prepend <filelist> - Add files to the beginning of the song queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     moosic.prepend(arglist)
 
 f = prepend
@@ -394,7 +385,7 @@ dispatcher[unmangle(f.__name__)] = f
 def mixin(moosic, arglist, opts):
     'mixin <filelist> - Add files to the song queue and reshuffle the entire queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     moosic.append(arglist)
     moosic.shuffle()
 
@@ -431,7 +422,7 @@ dispatcher[unmangle(f.__name__)] = f
 def insert(moosic, arglist, opts):
     'insert <filelist> <index> - Insert files at a specific point in the song queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     moosic.insert(arglist, insert.position)
 
 insert.position = 0
@@ -458,7 +449,7 @@ dispatcher[unmangle(f.__name__)] = f
 def replace(moosic, arglist, opts):
     "replace <filelist> - Clear the current the queue and add a new list of songs."
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     moosic.replace(arglist)
 
 f = replace
@@ -486,13 +477,13 @@ def interval_add(moosic, arglist, opts):
     at the specified interval.'''
     try:
         interval = int(arglist[0])
-    except ValueError, e:
-        print >>err, "Error:", e
-        print >>err, "An integer is required as the first argument."
+    except ValueError as e:
+        print("Error:", e, file=err)
+        print("An integer is required as the first argument.", file=err)
         return 2
     new_songs = process_filelist(moosic, arglist[1:], opts)
     for i in range(len(new_songs)):
-        moosic.insert([xmlrpclib.Binary(new_songs[i])], i*interval)
+        moosic.insert([xmlrpc.client.Binary(new_songs[i])], i*interval)
 
 f = interval_add
 f.category = 'add'
@@ -546,7 +537,7 @@ def remove(moosic, arglist, opts):
     'remove <regex-list> - Remove all queued items that match the given regex(s).'
     if opts['ignore-case']:
         arglist = [i + '(?i)' for i in arglist]
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     for pattern in arglist:
         moosic.remove(pattern)
 
@@ -561,7 +552,7 @@ def filter_(moosic, arglist, opts):
     'filter <regex-list> - Remove all queued items that do NOT match the given regex.'
     if opts['ignore-case']:
         arglist = [i + '(?i)' for i in arglist]
-    arglist = [xmlrpclib.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i) for i in arglist]
     for pattern in arglist:
         moosic.filter(pattern)
 
@@ -633,9 +624,9 @@ def move_pattern(moosic, arglist, opts):
         if not (destination[-1].isdigit() or destination[-1] == '-'):
             destination = destination[:-1]
         destination = int(destination)
-    except ValueError, e:
-        print >>err, 'Error:', e 
-        print >>err, 'An integer is required as the final argument.'
+    except ValueError as e:
+        print('Error:', e, file=err) 
+        print('An integer is required as the final argument.', file=err)
         return 2
     all_items = [i.data for i in moosic.list()]
     if opts['ignore-case']:
@@ -644,7 +635,7 @@ def move_pattern(moosic, arglist, opts):
     head = antigrep(pattern, all_items[:destination])
     tail = antigrep(pattern, all_items[destination:])
     all_items = head + items_to_move + tail
-    moosic.replace([xmlrpclib.Binary(i) for i in all_items])
+    moosic.replace([xmlrpc.client.Binary(i) for i in all_items])
 
 f = move_pattern
 f.category = 'rearrange'
@@ -750,7 +741,7 @@ def partial_sort(moosic, arglist, opts):
     items = []
     [items.extend(buckets[pattern]) for pattern in arglist]
     items.extend(leftovers)
-    items = [xmlrpclib.Binary(i) for i in items]
+    items = [xmlrpc.client.Binary(i) for i in items]
     moosic.replace(items)
 
 f = partial_sort
@@ -775,7 +766,7 @@ def stagger(moosic, arglist, opts):
     # Perform a staggered merge on all the lists we collected, along
     # with any remaining items.
     items = staggered_merge(*(list_of_lists)) + items
-    items = [xmlrpclib.Binary(i) for i in items]
+    items = [xmlrpc.client.Binary(i) for i in items]
     moosic.replace(items)
 
 f = stagger
@@ -796,7 +787,7 @@ def sub(moosic, arglist, opts):
         range = (start,)
     else:
         range = (start, end)
-    bin = xmlrpclib.Binary
+    bin = xmlrpc.client.Binary
     moosic.sub(bin(arglist[0]), bin(arglist[1]), range)
 
 f = sub
@@ -817,7 +808,7 @@ def suball(moosic, arglist, opts):
         range = (start,)
     else:
         range = (start, end)
-    bin = xmlrpclib.Binary
+    bin = xmlrpc.client.Binary
     moosic.sub_all(bin(arglist[0]), bin(arglist[1]), range)
 
 f = suball
@@ -840,7 +831,7 @@ def stagger_add(moosic, arglist, opts):
     # Perform a staggered merge on all the lists we collected, along
     # with any remaining items.
     items = staggered_merge(*(list_of_lists + [items]))
-    items = [xmlrpclib.Binary(i) for i in items]
+    items = [xmlrpc.client.Binary(i) for i in items]
     moosic.append(items)
 
 f = stagger_add
@@ -855,7 +846,7 @@ def stagger_merge(moosic, arglist, opts):
     '''
     new_items = process_filelist(moosic, arglist, opts)
     old_items = [i.data for i in moosic.list()]
-    items = [xmlrpclib.Binary(i) for i in staggered_merge(new_items, old_items)]
+    items = [xmlrpc.client.Binary(i) for i in staggered_merge(new_items, old_items)]
     moosic.replace(items)
 
 f = stagger_merge
@@ -867,7 +858,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def current(moosic, arglist, opts):
     'current - Print the name of the song that is currently playing.'
-    print moosic.current().data
+    print(moosic.current().data)
 
 f = current
 f.category = 'query'
@@ -891,9 +882,9 @@ def current_time(moosic, arglist, opts):
     '''current-time [format] - Print the amount of time that the current song has 
     been playing.'''
     if arglist:
-        print time.strftime(arglist[0], time.gmtime(moosic.current_time()))
+        print(time.strftime(arglist[0], time.gmtime(moosic.current_time())))
     else:
-        print time.strftime('%H:%M:%S', time.gmtime(moosic.current_time()))
+        print(time.strftime('%H:%M:%S', time.gmtime(moosic.current_time())))
     #current_time = moosic.current_time()
     #hours, remainder = divmod(current_time, 3600)
     #minutes, seconds = divmod(remainder, 60)
@@ -915,10 +906,10 @@ def list_(moosic, arglist, opts):
         start, end = 0, None
     if opts['current-in-list']:
         if arglist:
-            print >>sys.stderr, wrap("Warning: the -C option has no effect "
-                    "if an argument is given.")
+            print(wrap("Warning: the -C option has no effect "
+                    "if an argument is given."), file=sys.stderr)
         else:
-            print "[*]", moosic.current().data
+            print("[*]", moosic.current().data)
     if end is None:
         d = moosic.indexed_list((start,))
     else:
@@ -926,9 +917,9 @@ def list_(moosic, arglist, opts):
     index, items = d['start'], d['list']
     for item in items:
         try:
-            print '[%d] %s' % (index, item.data)
+            print('[%d] %s' % (index, item.data))
             index += 1
-        except IOError, e:
+        except IOError as e:
             if e[0] == errno.EPIPE:
                 break # Ignore "broken pipe" errors.
             else:
@@ -950,15 +941,15 @@ def plainlist(moosic, arglist, opts):
     try:
         if opts['current-in-list']:
             if arglist:
-                print >>sys.stderr, wrap("Warning: the -C option has no effect "
-                        "if an argument is given.")
+                print(wrap("Warning: the -C option has no effect "
+                        "if an argument is given."), file=sys.stderr)
             else:
-                print moosic.current().data
+                print(moosic.current().data)
         if end is None:
-            print '\n'.join([i.data for i in moosic.list((start,))])
+            print('\n'.join([i.data for i in moosic.list((start,))]))
         else:
-            print '\n'.join([i.data for i in moosic.list((start, end))])
-    except IOError, e:
+            print('\n'.join([i.data for i in moosic.list((start, end))]))
+    except IOError as e:
         if e[0] == errno.EPIPE:
             # Ignore "broken pipe" errors.
             pass
@@ -978,14 +969,14 @@ def history(moosic, arglist, opts):
         num = 0
     else:
         try: num = int(arglist[0])
-        except ValueError, e:
-            print "Error:", e
-            print 'The argument to the "history" command must be an integer.'
+        except ValueError as e:
+            print("Error:", e)
+            print('The argument to the "history" command must be an integer.')
             sys.exit(1)
     for item, starttime, endtime in moosic.history(num):
         item = item.data
         endtime = time.strftime('%I:%M:%S%p', time.localtime(endtime))
-        print string.join((endtime, item))
+        print(string.join((endtime, item)))
 
 f = history
 f.category = 'query'
@@ -1009,22 +1000,22 @@ def state(moosic, arglist, opts):
     'state - Print the current state of the music daemon.'
     current_song = moosic.current().data
     if current_song != '':
-        print 'Currently playing: "%s"' % current_song
+        print('Currently playing: "%s"' % current_song)
     else:
-        print 'Nothing is currently playing.'
+        print('Nothing is currently playing.')
     if moosic.is_paused():
-        print 'The current song is paused.'
+        print('The current song is paused.')
     else:
-        print 'The current song is not paused.'
+        print('The current song is not paused.')
     if moosic.is_queue_running():
-        print 'Queue advancement is enabled.'
+        print('Queue advancement is enabled.')
     else:
-        print 'Queue advancement is disabled.'
+        print('Queue advancement is disabled.')
     if moosic.is_looping():
-        print 'Loop mode is on.'
+        print('Loop mode is on.')
     else:
-        print 'Loop mode is off.'
-    print "There are %d items in the queue." % moosic.queue_length()
+        print('Loop mode is off.')
+    print("There are %d items in the queue." % moosic.queue_length())
 
 f = state
 f.category = 'query'
@@ -1046,7 +1037,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def length(moosic, arglist, opts):
     'length - Print the number of items in the queue.'
-    print moosic.queue_length()
+    print(moosic.queue_length())
 
 f = length
 f.category = 'query'
@@ -1069,10 +1060,10 @@ dispatcher[unmangle(f.__name__)] = f
 def ispaused(moosic, arglist, opts):
     'ispaused - Show whether the current song is paused.'
     if moosic.is_paused():
-        print "True"
+        print("True")
         return 0
     else:
-        print "False"
+        print("False")
         return 1
 
 f = ispaused
@@ -1085,10 +1076,10 @@ dispatcher[unmangle(f.__name__)] = f
 def islooping(moosic, arglist, opts):
     'islooping - Show whether the server is in loop mode.'
     if moosic.is_looping():
-        print "True"
+        print("True")
         return 0
     else:
-        print "False"
+        print("False")
         return 1
 
 f = islooping
@@ -1101,10 +1092,10 @@ dispatcher[unmangle(f.__name__)] = f
 def isadvancing(moosic, arglist, opts):
     'isadvancing - Show whether the server is advancing through the song queue.'
     if moosic.is_queue_running():
-        print "True"
+        print("True")
         return 0
     else:
-        print "False"
+        print("False")
         return 1
 
 f = isadvancing
@@ -1116,8 +1107,8 @@ dispatcher[unmangle(f.__name__)] = f
 
 def version(moosic, arglist, opts):
     'version - Print version information for the client and server, and then exit.'
-    print 'Moosic Client version:', VERSION
-    print 'Moosic Server version:', moosic.version()
+    print('Moosic Client version:', VERSION)
+    print('Moosic Server version:', moosic.version())
 
 f = version
 f.category = 'query'
@@ -1131,13 +1122,13 @@ def next(moosic, arglist, opts):
     if arglist:
         try:
             howmany = int(arglist[0])
-        except ValueError, e:
-            print "Error:", e
-            print 'The argument to the "next" command must be an integer.'
+        except ValueError as e:
+            print("Error:", e)
+            print('The argument to the "next" command must be an integer.')
             sys.exit(1)
         moosic.next(howmany)
     else:
-        moosic.next()
+        moosic.__next__()
 
 f = next
 f.category = 'manage'
@@ -1152,9 +1143,9 @@ def previous(moosic, arglist, opts):
     if arglist:
         try:
             howmany = int(arglist[0])
-        except ValueError, e:
-            print "Error:", e
-            print 'The argument to the "previous" command must be an integer.'
+        except ValueError as e:
+            print("Error:", e)
+            print('The argument to the "previous" command must be an integer.')
             sys.exit(1)
         moosic.previous(howmany)
     else:
@@ -1194,7 +1185,7 @@ def goto(moosic, arglist, opts):
             dest -= 1
         moosic.next(dest)
     else:
-        print 'No match found:', arglist[0]
+        print('No match found:', arglist[0])
 
 f = goto
 f.category = 'manage'
@@ -1217,7 +1208,7 @@ def gobackto(moosic, arglist, opts):
     if history:
         moosic.previous(dest)
     else:
-        print 'No match found:', arglist[0]
+        print('No match found:', arglist[0])
 
 f = gobackto
 f.category = 'manage'
@@ -1416,7 +1407,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def showconfig(moosic, arglist, opts):
     'showconfig - Query and print the filetype to song player associations.'
-    print moosic.showconfig().data
+    print(moosic.showconfig().data)
 
 f = showconfig
 f.category = 'manage'
@@ -1428,30 +1419,30 @@ dispatcher[unmangle(f.__name__)] = f
 def help(moosic, arglist, opts):
     'help [commands] - Get documentation on the available moosic commands.'
     if not arglist:
-        print 'The following commands are available:'
+        print('The following commands are available:')
         col_count = 0
-        commands = dispatcher.keys()
+        commands = list(dispatcher.keys())
         commands.sort()
         for command in commands:
             if dispatcher[command].category not in command_categories:
                 continue
-            print command,
+            print(command, end=' ')
             col_count += 1
             if not col_count % 5:
-                print
+                print()
             else:
-                print ' ' * (13 - len(command)),
+                print(' ' * (13 - len(command)), end=' ')
         if col_count % 5:
-            print
-        print 'Use "' + os.path.basename(sys.argv[0]),
-        print 'help <command>" to display help for a particular command.'
+            print()
+        print('Use "' + os.path.basename(sys.argv[0]), end=' ')
+        print('help <command>" to display help for a particular command.')
     else:
         for command in arglist:
             command = unmangle(command.lower())
             if command in dispatcher:
-                print dispatcher[command].__doc__
+                print(dispatcher[command].__doc__)
             else:
-                print "No such command:", command
+                print("No such command:", command)
 
 f = help
 f.category = 'query'
@@ -1494,7 +1485,7 @@ dispatcher[unmangle(f.__name__)] = f
 #----------------------------#
 
 def moo(moosic, arglist, opts):
-    print base64.decodestring('''\
+    print(base64.decodestring('''\
 ICAgICAgICAoX19fKSAgIChfX18pICAoX19fKSAoX19fKSAgICAgIChfX18pICAgKF9fXykgICAo
 X19fKSAoX19fKSAgICAgCiAgICAgICAgKG8gbyhfX18pbyBvKShfX18pbykgKG8gbykgKF9fXyko
 byBvKF9fXylvIG8pKF9fXykgbykgKG8gbykoX19fKQogICAgICAgICBcIC8obyBvKVwgLyAobyBv
@@ -1526,7 +1517,7 @@ ICBffF9fXyAvXCAgfF9fX19fX19fX19fX19fX19fX198ICAgICAgICAgICAgICAgICAgICAgICAg
 ICAgICAgICAgCiAgICAgICAgfD09PT09fCB8ICAgSSAgICAgICAgICAgICAgSSAgICAgICAgICAg
 ICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICpJICAgSXwgfCAgIEkgICAgICAgICAg
 ICAgIEkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgSSAgIEle
-IF4gICBJICAgICAgICAgICAgICBJICAgICAgICAgICAgICAgICAgICAgLWNmYmQt''')
+IF4gICBJICAgICAgICAgICAgICBJICAgICAgICAgICAgICAgICAgICAgLWNmYmQt'''))
 
 f = moo
 f.category = 'hidden'
@@ -1538,7 +1529,7 @@ dispatcher[unmangle(f.__name__)] = f
 def debuglist(moosic, arglist, opts):
     arglist = process_filelist(moosic, arglist, opts)
     for x in arglist:
-        print x
+        print(x)
 
 f = debuglist
 f.category = 'hidden'
@@ -1548,7 +1539,7 @@ dispatcher[unmangle(f.__name__)] = f
 #----------------------------#
 
 def debug(moosic, arglist, opts):
-    print moosic.debug(' '.join(arglist))
+    print(moosic.debug(' '.join(arglist)))
 
 f = debug
 f.category = 'hidden'
