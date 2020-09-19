@@ -50,7 +50,7 @@ def daemonize (stdin='/dev/null', stdout='/dev/null', stderr='/dev/null', reset_
     # Redirect standard file descriptors.
     si = open(stdin, 'r')
     so = open(stdout, 'a+')
-    se = open(stderr, 'a+', 0)
+    se = open(stderr, 'a+', 1)
     os.dup2(si.fileno(), sys.stdin.fileno())
     os.dup2(so.fileno(), sys.stdout.fileno())
     os.dup2(se.fileno(), sys.stderr.fileno())

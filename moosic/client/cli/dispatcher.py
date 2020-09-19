@@ -193,7 +193,10 @@ def read_playlists(playlists, opts):
 
 
 def process_filelist(moosic, arglist, opts):
+    print("In moosic/client/cli/dispatcher.py:process_filelist()")
+    print("arglist:", arglist)
     if opts['auto-grep']:
+        print("matched option auto-grep")
         # Be case-insensitive if that was requested.
         if opts['ignore-case']:
             arglist = [i + '(?i)' for i in arglist]
@@ -208,7 +211,8 @@ def process_filelist(moosic, arglist, opts):
         [output.extend(grep(a, files)) for a in arglist]
         arglist = output
     if opts['auto-find']: # This feature was inspired by David McCabe.
-        del_non_wordchars = make_string_filter(string.letters+string.digits+'/')
+        print("matched option auto-find")
+        del_non_wordchars = make_string_filter(string.asciiletters+string.digits+'/')
         def simplify(s):
             return del_non_wordchars(s).lower()
         # Simplify the strings to be sought after.
@@ -237,13 +241,16 @@ def process_filelist(moosic, arglist, opts):
     # relative pathnames would be foolish because the server has no idea
     # what our current working directory is.
     if opts['file-munge']:
+        print("matched option file-munge")
         arglist = list(map(os.path.expanduser, arglist))
         arglist = list(map(os.path.abspath, arglist))
     if opts['shuffle-args']:
+        print("matched option shuffle-args")
         random.shuffle(arglist)
     # If an item in the filelist is a directory, then recurse through the
     # directory, replacing the item with its children.
     if opts['dir-recurse']:
+        print("matched option dir-recurse")
         pos = 0
         while pos < len(arglist):
             if os.path.isdir(arglist[pos]):
@@ -259,11 +266,14 @@ def process_filelist(moosic, arglist, opts):
                     arglist.insert(pos, item)
             pos = pos + 1
     if opts['shuffle-global']:
+        print("matched option shuffle-global")
         random.shuffle(arglist)
     if opts['sort']:
+        print("matched option sort")
         arglist.sort()
     if opts['no-unplayables']:
-        playable_patterns = [entry[0].data for entry in moosic.getconfig()]
+        print("matched option no-unplayables")
+        playable_patterns = [str(entry[0].data).lstrip("\"'b").rstrip("\"'") for entry in moosic.getconfig()]
         newlist = []
         for i in arglist:
             for pat in playable_patterns:
@@ -271,6 +281,7 @@ def process_filelist(moosic, arglist, opts):
                     newlist.append(i)
                     break
         arglist = newlist
+    print("dispatcher.py:process_filelist(): about to return arglist", arglist)
     return arglist
 
 #---------------------------- Dispatcher functions ----------------------------#
@@ -343,7 +354,7 @@ dispatcher[unmangle(f.__name__)] = f
 def prepend(moosic, arglist, opts):
     'prepend <filelist> - Add files to the beginning of the song queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     moosic.prepend(arglist)
 
 f = prepend
@@ -911,10 +922,10 @@ def list_(moosic, arglist, opts):
     index, items = d['start'], d['list']
     for item in items:
         try:
-            print('[%d] %s' % (index, item.data))
+            print('[%d] %s' % (index, item.data.decode()))
             index += 1
         except IOError as e:
-            if e[0] == errno.EPIPE:
+            if e.errno == errno.EPIPE:
                 break # Ignore "broken pipe" errors.
             else:
                 raise e
@@ -944,7 +955,7 @@ def plainlist(moosic, arglist, opts):
         else:
             print('\n'.join([i.data for i in moosic.list((start, end))]))
     except IOError as e:
-        if e[0] == errno.EPIPE:
+        if e.errno == errno.EPIPE:
             # Ignore "broken pipe" errors.
             pass
         else:
@@ -968,9 +979,9 @@ def history(moosic, arglist, opts):
             print('The argument to the "history" command must be an integer.')
             sys.exit(1)
     for item, starttime, endtime in moosic.history(num):
-        item = item.data
+        item = str(item.data.decode()).lstrip("\"'b").rstrip("\"'")
         endtime = time.strftime('%I:%M:%S%p', time.localtime(endtime))
-        print(string.join((endtime, item)))
+        print(' '.join((endtime, item)))
 
 f = history
 f.category = 'query'

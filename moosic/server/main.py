@@ -76,7 +76,7 @@ def request_handler(server):
     except socket.error as e:
         data.quitFlag = True  # Tell the queue consumer to quit.
         import errno
-        if e[0] == errno.EINTR:
+        if e.errno == errno.EINTR:
             sys.exit() # Ignore "Interrupted system call" exceptions.
         else:
             sys.exit(data.log(Log.ERROR, 'Socket error: %s' % e))
@@ -132,7 +132,7 @@ def play(config, songname):
                 logfile = open(logfilename, 'w', buffering)
             # Delimit each entry in the log file with a time-stamped message.
             now = time.strftime('%I:%M:%S%p', time.localtime(time.time()))
-            logfile.write('%s Executing "%s"\n' % (now, string.join(command)))
+            logfile.write('%s Executing "%s"\n' % (now, ' '.join(command)))
             logfile.flush()
             # Capture the program's standard error stream.
             os.dup2(logfile.fileno(), sys.__stderr__.fileno())
@@ -341,7 +341,7 @@ def main(argv):
     savefilename = os.path.join(data.confdir, 'saved_state')
     if os.path.exists(savefilename):
         try:
-            data.setstate(pickle.load(open(savefilename)))
+            data.setstate(pickle.load(open(savefilename, "rb")))
         except IOError as e:
             data.log(Log.WARNING,
               'Cannot open saved-state file "%s": %s' % (e.filename,e.strerror))
@@ -363,7 +363,7 @@ def main(argv):
             data.moosic_server = UnixMoosicServer(server_addr)
         except socket.error as e:
             import errno
-            if e[0] == errno.EADDRINUSE:
+            if e.errno == errno.EADDRINUSE:
                 try:
                     import moosic.client.factory
                     moosic.client.factory.LocalMoosicProxy(server_addr).no_op()
@@ -401,7 +401,7 @@ def main(argv):
             data.extra_moosic_server = TcpMoosicServer(server_addr)
         except socket.error as e:
             import errno
-            if e[0] == errno.EADDRINUSE:
+            if e.errno == errno.EADDRINUSE:
                 try:
                     import moosic.client.factory
                     moosic.client.factory.InetMoosicProxy(*server_addr).no_op()
@@ -438,7 +438,7 @@ def main(argv):
         "Save the Moosic server's current state to disk."
         try:
             savefilename = os.path.join(data.confdir, 'saved_state')
-            pickle.dump(data.getstate(), open(savefilename, 'w'))
+            pickle.dump(data.getstate(), open(savefilename, 'wb'))
         except IOError as e:
             data.log(Log.WARNING,
               'Cannot open saved-state file "%s" for writing: %s' %

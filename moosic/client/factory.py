@@ -121,7 +121,7 @@ def startServer(*argv):
     try:
         moosic.server.main.main(argv)
     except SystemExit as e:
-        status = e[0]
+        status = e.code
         if not status:
             status = None
         elif type(status) == int:

@@ -222,9 +222,9 @@ def parse_range(range, start=0, end=0):
         range = range[1:]
     if not (range[-1].isdigit() or range[-1] in ('-', ':')):
         range = range[:-1]
-    colon_count = string.count(range, ':')
+    colon_count = range.count(':')
     if colon_count == 1:
-        a, b = string.split(range, ':')
+        a, b = range.split(':')
         try:
             if a:
                 start = int(a)
@@ -260,15 +260,14 @@ def wrap(text, width=79):
                  )
 
 
-# The following function is modeled after recipe 3.7 from the Python Cookbook,
+# The Python 2 version of following function was modeled after recipe 3.7 from the Python Cookbook,
 # which was written by JÜrgen Hermann and Nick Perkins.
 def make_string_filter(keep):
     '''Return a function that takes a string and returns a partial copy of that
     string consisting only of the characters in 'keep'.
     '''
-    allchars = string.maketrans('', '')
-    delchars = allchars.translate(allchars, keep)
-    def string_filter(s, a=allchars, d=delchars): return s.translate(a, d)
+    def string_filter(input):
+        return "".join(x for x in input if x in keep)
     return string_filter
 
 

@@ -63,7 +63,7 @@ def insert(items, position):
     p = position  # Make a shorter alias so that we can fit into 80 colums.
     data.lock.acquire()
     try:
-        data.song_queue[p:p] = [_f for _f in [str(i.data) for i in items] if _f]
+        data.song_queue[p:p] = [_f for _f in [str(i.data.decode()) for i in items] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -159,6 +159,8 @@ def prepend(items):
         has no idea what the client's current working directory is.
     Return value: Nothing meaningful.
     '''
+    print("In moosic/server/methods.py:prepend()")
+    print("items:", items)
     return insert(items, 0)
 moosicd_methods.register(prepend, [[BOOLEAN, ARRAY]])
 
@@ -375,8 +377,9 @@ def list(range=()):
     Return value: An array of (base64-encoded) strings, representing the
         selected range from the song queue's contents.
     '''
+    print("In server methods.py:list(), with range", range)
     start, end = split_range(range)
-    return [Binary(i) for i in data.song_queue[start:end]]
+    return [Binary(i.encode()) for i in data.song_queue[start:end]]
 moosicd_methods.register(list, [[ARRAY], [ARRAY, ARRAY]])
 
 
@@ -405,7 +408,7 @@ def indexed_list(range=()):
         song queue.
     '''
     start, end = split_range(range)
-    list = [Binary(i) for i in data.song_queue[start:end]]
+    list = [Binary(i.encode()) for i in data.song_queue[start:end]]
     start_index = start
     if start_index < 0:
         start_index = len(data.song_queue) + start_index
@@ -1002,7 +1005,7 @@ def history(limit=0):
         represents the time that the song finished playing in seconds since the
         epoch.
     '''
-    return [(Binary(item), starttime, endtime)
+    return [(Binary(item.encode()), starttime, endtime)
             for item, starttime, endtime in data.history[-limit:]]
 moosicd_methods.register(history, [[ARRAY], [ARRAY, INT]])
 
@@ -1176,7 +1179,8 @@ def getconfig():
     # strings in this list.  This is less convenient, and it seems unlikely that
     # either the pattern or the command would contain non-ASCII characters...
     # but you can never be sure.  Better safe than sorry.
-    return [(Binary(regex.pattern), Binary(' '.join(cmd))) for regex, cmd in data.config]
+    return [(Binary(regex.pattern.encode()), Binary(' '.join(cmd).encode()))
+      for regex, cmd in data.config]
 moosicd_methods.register(getconfig, [[ARRAY]])
 
 

@@ -29,6 +29,7 @@ import sys, os, os.path, string, threading, time, socket, traceback, errno
 import socketserver, xmlrpc.server
 
 __all__ = ('data', 'readConfig', 'strConfig', 'getConfigFile', 'split_range',
+#__all__ = ('data', 'readConfig', 'getConfigFile', 'split_range',
            'Log', 'UnixMoosicRequestHandler', 'TcpMoosicRequestHandler',
            'UnixMoosicServer', 'TcpMoosicServer')
 
@@ -219,7 +220,7 @@ def readConfig(filename):
             expecting_regex = False
         # the second line in each pair is interpreted as a command
         else:
-            command = string.split(line)
+            command = line.split()
             config.append((regex, command))
             expecting_regex = True
     return config
@@ -235,7 +236,7 @@ def strConfig(config):
     """
     s = ''
     for regex, command in config:
-        s = s + regex.pattern + '\n\t' + string.join(command) + '\n'
+        s = s + regex.pattern + '\n\t' + ' '.join(command) + '\n'
     return s
 
 
@@ -371,7 +372,7 @@ class Log:
         orig_message = message
         if priority <= self.loglevel:
             # Portability note: Unix-style newlines are assumed.
-            message = string.replace(message, "\n", "\n\t")
+            message = message.replace("\n", "\n\t")
             now = time.strftime('%I:%M:%S%p', time.localtime(time.time()))
             message = "%s [%s] %s\n" % (now, self.priorityNames[priority], message)
             self.logfile.write(message)

@@ -245,7 +245,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.""")
         if command != 'startserver': # unless the user is starting it explicitly
             moosic.no_op()
     except socket.error as e:
-        if e[0] in (errno.ECONNREFUSED, errno.ENOENT):
+        if e.errno in (errno.ECONNREFUSED, errno.ENOENT):
             # The server doesn't seem to be running, so let's try to start it
             # for ourselves.
             if opts['tcp-address']:
