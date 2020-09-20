@@ -90,7 +90,7 @@ def replace(items):
                             i.__class__.__name__)
     data.lock.acquire()
     try:
-        data.song_queue = [_f for _f in [str(i.data) for i in items] if _f]
+        data.song_queue = [_f for _f in [str(i.data.decode()) for i in items] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -126,7 +126,7 @@ def replace_range(range, items):
                             i.__class__.__name__)
     data.lock.acquire()
     try:
-        data.song_queue[start:end] = [_f for _f in [str(i.data) for i in items] if _f]
+        data.song_queue[start:end] = [_f for _f in [str(i.data.decode()) for i in items] if _f]
     finally:
         data.last_queue_update = time.time()
         data.lock.release()
@@ -159,8 +159,6 @@ def prepend(items):
         has no idea what the client's current working directory is.
     Return value: Nothing meaningful.
     '''
-    print("In moosic/server/methods.py:prepend()")
-    print("items:", items)
     return insert(items, 0)
 moosicd_methods.register(prepend, [[BOOLEAN, ARRAY]])
 
@@ -201,9 +199,9 @@ def sub_all(pattern, replace, range=()):
     '''
     start, end = split_range(range)
     if hasattr(pattern, 'data'):
-        pattern = str(pattern.data)
+        pattern = str(pattern.data.decode())
     if hasattr(replace, 'data'):
-        replace = str(replace.data)
+        replace = str(replace.data.decode())
     pattern = re.compile(pattern)
     data.lock.acquire()
     try:
@@ -237,9 +235,9 @@ def sub(pattern, replace, range=()):
     '''
     start, end = split_range(range)
     if hasattr(pattern, 'data'):
-        pattern = str(pattern.data)
+        pattern = str(pattern.data.decode())
     if hasattr(replace, 'data'):
-        replace = str(replace.data)
+        replace = str(replace.data.decode())
     pattern = re.compile(pattern)
     data.lock.acquire()
     try:
@@ -357,7 +355,7 @@ def current():
     Arguments: None.
     Return value: The name of the currently playing song.
     '''
-    return Binary(data.current_song)
+    return Binary(data.current_song.encode())
 moosicd_methods.register(current, [[BASE64]])
 
 
@@ -377,7 +375,6 @@ def list(range=()):
     Return value: An array of (base64-encoded) strings, representing the
         selected range from the song queue's contents.
     '''
-    print("In server methods.py:list(), with range", range)
     start, end = split_range(range)
     return [Binary(i.encode()) for i in data.song_queue[start:end]]
 moosicd_methods.register(list, [[ARRAY], [ARRAY, ARRAY]])
@@ -441,7 +438,7 @@ moosicd_methods.register(indexed_list, [[STRUCT], [STRUCT, ARRAY]])
 #        denotes the character whose ASCII ordinal is 0.)
 #    '''
 #    start, end = split_range(range)
-#    return Binary('\0'.join(data.song_queue[start:end]))
+#    return Binary('\0'.join(data.song_queue[start:end]).encode())
 #moosicd_methods.register(packed_list, [[BASE64], [BASE64, ARRAY]])
 
 
@@ -748,7 +745,7 @@ def remove(regexp, range=()):
     data.lock.acquire()
     try:
         if hasattr(regexp, 'data'):
-            regexp = regexp.data
+            regexp = regexp.data.decode()
         data.song_queue[start:end] = antigrep(regexp, data.song_queue[start:end])
     finally:
         data.last_queue_update = time.time()
@@ -777,7 +774,7 @@ def filter_(regexp, range=()):
     data.lock.acquire()
     try:
         if hasattr(regexp, 'data'):
-            regexp = regexp.data
+            regexp = regexp.data.decode()
         data.song_queue[start:end] = grep(regexp, data.song_queue[start:end])
     finally:
         data.last_queue_update = time.time()
@@ -1161,7 +1158,7 @@ def showconfig():
     Return value: A (base64-encoded) string that shows which programs will be
         used to play the various file-types recognized by the Moosic server.
     '''
-    return Binary(moosic.server.support.strConfig(data.config))
+    return Binary(moosic.server.support.strConfig(data.config).encode())
 moosicd_methods.register(showconfig, [[BASE64]])
 
 
@@ -1218,7 +1215,7 @@ moosicd_methods.register(lambda:1, [[BOOLEAN]], "__nonzero__")
 #def __getitem__(index):
 #    """This is experimental.  Ignore it.
 #    """
-#    return Binary(data.song_queue[index])
+#    return Binary(data.song_queue[index].encode())
 #moosicd_methods.register(__getitem__, [[BASE64, INT]])
 ##moosicd_methods.register(__getitem__, [[BASE64, INT]], "getitem")
 
@@ -1226,7 +1223,7 @@ moosicd_methods.register(lambda:1, [[BOOLEAN]], "__nonzero__")
 #def __getslice__(start, stop):
 #    """This is experimental.  Ignore it.
 #    """
-#    return [Binary(i) for i in data.song_queue[start:stop]]
+#    return [Binary(i.encode()) for i in data.song_queue[start:stop]]
 #moosicd_methods.register(__getslice__, [[ARRAY, INT]])
 ##moosicd_methods.register(__getslice__, [[ARRAY, INT]], "getslice")
 

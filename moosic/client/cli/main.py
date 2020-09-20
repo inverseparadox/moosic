@@ -278,7 +278,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.""")
         # Dispatch the command.
         exit_status = dispatcher[command](moosic, arglist, opts)
     except socket.error as e:
-        exit_status = "Socket error: %s" % e[1]
+        exit_status = "Socket error: %s" % e.strerror
     except xmlrpc.client.Fault as e:
         if ':' in e.faultString:
             fault_type, fault_msg = e.faultString.split(':', 1)

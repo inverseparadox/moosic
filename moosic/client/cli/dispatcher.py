@@ -193,10 +193,7 @@ def read_playlists(playlists, opts):
 
 
 def process_filelist(moosic, arglist, opts):
-    print("In moosic/client/cli/dispatcher.py:process_filelist()")
-    print("arglist:", arglist)
     if opts['auto-grep']:
-        print("matched option auto-grep")
         # Be case-insensitive if that was requested.
         if opts['ignore-case']:
             arglist = [i + '(?i)' for i in arglist]
@@ -211,7 +208,6 @@ def process_filelist(moosic, arglist, opts):
         [output.extend(grep(a, files)) for a in arglist]
         arglist = output
     if opts['auto-find']: # This feature was inspired by David McCabe.
-        print("matched option auto-find")
         del_non_wordchars = make_string_filter(string.asciiletters+string.digits+'/')
         def simplify(s):
             return del_non_wordchars(s).lower()
@@ -241,16 +237,13 @@ def process_filelist(moosic, arglist, opts):
     # relative pathnames would be foolish because the server has no idea
     # what our current working directory is.
     if opts['file-munge']:
-        print("matched option file-munge")
         arglist = list(map(os.path.expanduser, arglist))
         arglist = list(map(os.path.abspath, arglist))
     if opts['shuffle-args']:
-        print("matched option shuffle-args")
         random.shuffle(arglist)
     # If an item in the filelist is a directory, then recurse through the
     # directory, replacing the item with its children.
     if opts['dir-recurse']:
-        print("matched option dir-recurse")
         pos = 0
         while pos < len(arglist):
             if os.path.isdir(arglist[pos]):
@@ -266,14 +259,11 @@ def process_filelist(moosic, arglist, opts):
                     arglist.insert(pos, item)
             pos = pos + 1
     if opts['shuffle-global']:
-        print("matched option shuffle-global")
         random.shuffle(arglist)
     if opts['sort']:
-        print("matched option sort")
         arglist.sort()
     if opts['no-unplayables']:
-        print("matched option no-unplayables")
-        playable_patterns = [str(entry[0].data).lstrip("\"'b").rstrip("\"'") for entry in moosic.getconfig()]
+        playable_patterns = [entry[0].data.decode() for entry in moosic.getconfig()]
         newlist = []
         for i in arglist:
             for pat in playable_patterns:
@@ -281,7 +271,6 @@ def process_filelist(moosic, arglist, opts):
                     newlist.append(i)
                     break
         arglist = newlist
-    print("dispatcher.py:process_filelist(): about to return arglist", arglist)
     return arglist
 
 #---------------------------- Dispatcher functions ----------------------------#
@@ -307,7 +296,7 @@ dispatcher[unmangle(f.__name__)] = f
 def append(moosic, arglist, opts):
     'append <filelist> - Add files to the end of the song queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     moosic.append(arglist)
 
 f = append
@@ -390,7 +379,7 @@ dispatcher[unmangle(f.__name__)] = f
 def mixin(moosic, arglist, opts):
     'mixin <filelist> - Add files to the song queue and reshuffle the entire queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     moosic.append(arglist)
     moosic.shuffle()
 
@@ -427,7 +416,7 @@ dispatcher[unmangle(f.__name__)] = f
 def insert(moosic, arglist, opts):
     'insert <filelist> <index> - Insert files at a specific point in the song queue.'
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     moosic.insert(arglist, insert.position)
 
 insert.position = 0
@@ -441,6 +430,12 @@ dispatcher[unmangle(f.__name__)] = f
 def pl_insert(moosic, arglist, opts):
     """pl-insert <playlists> <index> - Insert playlists' contents at a specific point
     the song queue."""
+    # BUG: Nothing currently handles the case where an index is passed as the final
+    # argument, after all the playlists. That's documented in the man page, but
+    # doesn't work, and maybe never did.
+    # Proposed fix: Build a 'playlists' which is the same as arglist except with the
+    # trailing index stripped, and pass that to read_playlists(). Bonus: Also lets us
+    # verify that the trailing argument is a valid index.
     arglist = read_playlists(arglist, opts)
     insert(moosic, arglist, opts)
 
@@ -454,7 +449,7 @@ dispatcher[unmangle(f.__name__)] = f
 def replace(moosic, arglist, opts):
     "replace <filelist> - Clear the current the queue and add a new list of songs."
     arglist = process_filelist(moosic, arglist, opts)
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     moosic.replace(arglist)
 
 f = replace
@@ -488,7 +483,7 @@ def interval_add(moosic, arglist, opts):
         return 2
     new_songs = process_filelist(moosic, arglist[1:], opts)
     for i in range(len(new_songs)):
-        moosic.insert([xmlrpc.client.Binary(new_songs[i])], i*interval)
+        moosic.insert([xmlrpc.client.Binary(new_songs[i].encode())], i*interval)
 
 f = interval_add
 f.category = 'add'
@@ -542,7 +537,7 @@ def remove(moosic, arglist, opts):
     'remove <regex-list> - Remove all queued items that match the given regex(s).'
     if opts['ignore-case']:
         arglist = [i + '(?i)' for i in arglist]
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     for pattern in arglist:
         moosic.remove(pattern)
 
@@ -557,7 +552,7 @@ def filter_(moosic, arglist, opts):
     'filter <regex-list> - Remove all queued items that do NOT match the given regex.'
     if opts['ignore-case']:
         arglist = [i + '(?i)' for i in arglist]
-    arglist = [xmlrpc.client.Binary(i) for i in arglist]
+    arglist = [xmlrpc.client.Binary(i.encode()) for i in arglist]
     for pattern in arglist:
         moosic.filter(pattern)
 
@@ -633,14 +628,14 @@ def move_pattern(moosic, arglist, opts):
         print('Error:', e, file=err) 
         print('An integer is required as the final argument.', file=err)
         return 2
-    all_items = [i.data for i in moosic.list()]
+    all_items = [i.data.decode() for i in moosic.list()]
     if opts['ignore-case']:
         pattern += '(?i)'
     items_to_move = grep(pattern, all_items)
     head = antigrep(pattern, all_items[:destination])
     tail = antigrep(pattern, all_items[destination:])
     all_items = head + items_to_move + tail
-    moosic.replace([xmlrpc.client.Binary(i) for i in all_items])
+    moosic.replace([xmlrpc.client.Binary(i.encode()) for i in all_items])
 
 f = move_pattern
 f.category = 'rearrange'
@@ -733,7 +728,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def partial_sort(moosic, arglist, opts):
     'partial-sort <regex-list> - Separate the queue items into categories.'
-    items = [i.data for i in moosic.list()]
+    items = [i.data.decode() for i in moosic.list()]
     buckets = {}
     if opts['ignore-case']:
         arglist = [i + '(?i)' for i in arglist]
@@ -746,7 +741,7 @@ def partial_sort(moosic, arglist, opts):
     items = []
     [items.extend(buckets[pattern]) for pattern in arglist]
     items.extend(leftovers)
-    items = [xmlrpc.client.Binary(i) for i in items]
+    items = [xmlrpc.client.Binary(i.encode()) for i in items]
     moosic.replace(items)
 
 f = partial_sort
@@ -759,7 +754,7 @@ dispatcher[unmangle(f.__name__)] = f
 def stagger(moosic, arglist, opts):
     '''stagger <regex-list> - Arrange the queue contents into a list that alternates
     between two or more categories.'''
-    items = [i.data for i in moosic.list()]
+    items = [i.data.decode() for i in moosic.list()]
     list_of_lists = []
     if opts['ignore-case']:
         arglist = [i + '(?i)' for i in arglist]
@@ -771,7 +766,7 @@ def stagger(moosic, arglist, opts):
     # Perform a staggered merge on all the lists we collected, along
     # with any remaining items.
     items = staggered_merge(*(list_of_lists)) + items
-    items = [xmlrpc.client.Binary(i) for i in items]
+    items = [xmlrpc.client.Binary(i.encode()) for i in items]
     moosic.replace(items)
 
 f = stagger
@@ -793,7 +788,7 @@ def sub(moosic, arglist, opts):
     else:
         range = (start, end)
     bin = xmlrpc.client.Binary
-    moosic.sub(bin(arglist[0]), bin(arglist[1]), range)
+    moosic.sub(bin(arglist[0].encode()), bin(arglist[1].encode()), range)
 
 f = sub
 f.category = 'rearrange'
@@ -814,7 +809,7 @@ def suball(moosic, arglist, opts):
     else:
         range = (start, end)
     bin = xmlrpc.client.Binary
-    moosic.sub_all(bin(arglist[0]), bin(arglist[1]), range)
+    moosic.sub_all(bin(arglist[0].encode()), bin(arglist[1].encode()), range)
 
 f = suball
 f.category = 'rearrange'
@@ -836,7 +831,7 @@ def stagger_add(moosic, arglist, opts):
     # Perform a staggered merge on all the lists we collected, along
     # with any remaining items.
     items = staggered_merge(*(list_of_lists + [items]))
-    items = [xmlrpc.client.Binary(i) for i in items]
+    items = [xmlrpc.client.Binary(i.encode()) for i in items]
     moosic.append(items)
 
 f = stagger_add
@@ -850,8 +845,8 @@ def stagger_merge(moosic, arglist, opts):
     '''stagger-merge <filelist> - Interleave the given file list into the song queue.
     '''
     new_items = process_filelist(moosic, arglist, opts)
-    old_items = [i.data for i in moosic.list()]
-    items = [xmlrpc.client.Binary(i) for i in staggered_merge(new_items, old_items)]
+    old_items = [i.data.decode() for i in moosic.list()]
+    items = [xmlrpc.client.Binary(i.encode()) for i in staggered_merge(new_items, old_items)]
     moosic.replace(items)
 
 f = stagger_merge
@@ -863,7 +858,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def current(moosic, arglist, opts):
     'current - Print the name of the song that is currently playing.'
-    print(moosic.current().data)
+    print(moosic.current().data.decode())
 
 f = current
 f.category = 'query'
@@ -914,7 +909,7 @@ def list_(moosic, arglist, opts):
             print(wrap("Warning: the -C option has no effect "
                     "if an argument is given."), file=sys.stderr)
         else:
-            print("[*]", moosic.current().data)
+            print("[*]", moosic.current().data.decode())
     if end is None:
         d = moosic.indexed_list((start,))
     else:
@@ -949,11 +944,11 @@ def plainlist(moosic, arglist, opts):
                 print(wrap("Warning: the -C option has no effect "
                         "if an argument is given."), file=sys.stderr)
             else:
-                print(moosic.current().data)
+                print(moosic.current().data.decode())
         if end is None:
-            print('\n'.join([i.data for i in moosic.list((start,))]))
+            print('\n'.join([i.data.decode() for i in moosic.list((start,))]))
         else:
-            print('\n'.join([i.data for i in moosic.list((start, end))]))
+            print('\n'.join([i.data.decode() for i in moosic.list((start, end))]))
     except IOError as e:
         if e.errno == errno.EPIPE:
             # Ignore "broken pipe" errors.
@@ -1003,7 +998,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def state(moosic, arglist, opts):
     'state - Print the current state of the music daemon.'
-    current_song = moosic.current().data
+    current_song = moosic.current().data.decode()
     if current_song != '':
         print('Currently playing: "%s"' % current_song)
     else:
@@ -1133,6 +1128,9 @@ def next(moosic, arglist, opts):
             sys.exit(1)
         moosic.next(howmany)
     else:
+        # BUG: At least with Python 3, the server doesn't define any such method.
+        # However, I don't see any reason why just .next(1) shouldn't work.
+        # The real question is why this works in the Python 2 version.
         moosic.__next__()
 
 f = next
@@ -1181,7 +1179,7 @@ def goto(moosic, arglist, opts):
     queue = moosic.list()
     dest = 1
     while queue:
-        if re.search(arglist[0], queue[0].data):
+        if re.search(arglist[0], queue[0].data.decode()):
             break
         dest += 1
         queue.pop(0)
@@ -1206,7 +1204,7 @@ def gobackto(moosic, arglist, opts):
     history = moosic.history()
     dest = 1
     while history:
-        if re.search(arglist[0], history[-1][0].data):
+        if re.search(arglist[0], history[-1][0].data.decode()):
             break
         dest += 1
         history.pop()
@@ -1412,7 +1410,7 @@ dispatcher[unmangle(f.__name__)] = f
 
 def showconfig(moosic, arglist, opts):
     'showconfig - Query and print the filetype to song player associations.'
-    print(moosic.showconfig().data)
+    print(moosic.showconfig().data.decode())
 
 f = showconfig
 f.category = 'manage'
