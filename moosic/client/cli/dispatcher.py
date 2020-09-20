@@ -142,7 +142,7 @@ def check_args(command, arglist):
 
     # Pluck off the "index" argument to the insert and pl-insert commands
     # before processing the rest of their argument lists.
-    if command == 'insert' or command == 'pl-insert':
+    if command == 'insert' or command == 'plinsert':
         try:
             index = arglist.pop()
             if not (index[0].isdigit() or index[0] == '-'):
@@ -430,12 +430,6 @@ dispatcher[unmangle(f.__name__)] = f
 def pl_insert(moosic, arglist, opts):
     """pl-insert <playlists> <index> - Insert playlists' contents at a specific point
     the song queue."""
-    # BUG: Nothing currently handles the case where an index is passed as the final
-    # argument, after all the playlists. That's documented in the man page, but
-    # doesn't work, and maybe never did.
-    # Proposed fix: Build a 'playlists' which is the same as arglist except with the
-    # trailing index stripped, and pass that to read_playlists(). Bonus: Also lets us
-    # verify that the trailing argument is a valid index.
     arglist = read_playlists(arglist, opts)
     insert(moosic, arglist, opts)
 
