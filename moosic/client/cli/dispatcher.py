@@ -1479,7 +1479,7 @@ dispatcher[unmangle(f.__name__)] = f
 #----------------------------#
 
 def moo(moosic, arglist, opts):
-    print(base64.decodestring('''\
+    print(base64.decodebytes('''\
 ICAgICAgICAoX19fKSAgIChfX18pICAoX19fKSAoX19fKSAgICAgIChfX18pICAgKF9fXykgICAo
 X19fKSAoX19fKSAgICAgCiAgICAgICAgKG8gbyhfX18pbyBvKShfX18pbykgKG8gbykgKF9fXyko
 byBvKF9fXylvIG8pKF9fXykgbykgKG8gbykoX19fKQogICAgICAgICBcIC8obyBvKVwgLyAobyBv
@@ -1511,7 +1511,7 @@ ICBffF9fXyAvXCAgfF9fX19fX19fX19fX19fX19fX198ICAgICAgICAgICAgICAgICAgICAgICAg
 ICAgICAgICAgCiAgICAgICAgfD09PT09fCB8ICAgSSAgICAgICAgICAgICAgSSAgICAgICAgICAg
 ICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICpJICAgSXwgfCAgIEkgICAgICAgICAg
 ICAgIEkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgSSAgIEle
-IF4gICBJICAgICAgICAgICAgICBJICAgICAgICAgICAgICAgICAgICAgLWNmYmQt'''))
+IF4gICBJICAgICAgICAgICAgICBJICAgICAgICAgICAgICAgICAgICAgLWNmYmQt'''.encode()).decode())
 
 f = moo
 f.category = 'hidden'
