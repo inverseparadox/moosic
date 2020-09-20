@@ -260,8 +260,8 @@ def wrap(text, width=79):
                  )
 
 
-# The Python 2 version of following function was modeled after recipe 3.7 from the Python Cookbook,
-# which was written by JÜrgen Hermann and Nick Perkins.
+# The Python 2 version of the following function was modeled after recipe 3.7
+# from the Python Cookbook, which was written by JÜrgen Hermann and Nick Perkins.
 def make_string_filter(keep):
     '''Return a function that takes a string and returns a partial copy of that
     string consisting only of the characters in 'keep'.
