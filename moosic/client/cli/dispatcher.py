@@ -1128,10 +1128,7 @@ def next(moosic, arglist, opts):
             sys.exit(1)
         moosic.next(howmany)
     else:
-        # BUG: At least with Python 3, the server doesn't define any such method.
-        # However, I don't see any reason why just .next(1) shouldn't work.
-        # The real question is why this works in the Python 2 version.
-        moosic.__next__()
+        moosic.next()
 
 f = next
 f.category = 'manage'
