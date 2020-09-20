@@ -512,8 +512,21 @@ def unpause():
     data.lock.acquire()
     try:
         if data.current_song and data.player_pid:
+            # ogg123 behaves very stupidly when it gets a CONT signal, so it needs
+            # to be handled specially. This logic for determining when to apply this
+            # special case is complicated, and interferes with readability, and is
+            # yucky and evil and sloppy, and makes assumptions which are not
+            # necessarily true. I hate you, ogg123.
+            command = None
+            for regex, cmd in data.config:
+                if regex.search(data.current_song):
+                    command = cmd[:]
+                    break
             try:
                 os.kill(data.player_pid, signal.SIGCONT)
+                if command and command[0] == 'ogg123':
+                    time.sleep(0.10)
+                    os.kill(data.player_pid, signal.SIGCONT)
             except OSError as e:
                 if e.errno == errno.ESRCH:
                     data.player_pid = None
