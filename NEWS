@@ -1,5 +1,19 @@
 ----------------------
 
+Version 1.5.7:
+
+New maintainer, as upstream doesn't seem to have touched the program in nine
+years.
+
+Updated to run with Python 3 instead of Python 2, as the latter is now no
+longer receiving bug fixes and is being removed from common distribution.
+
+Fixed a bug of unknown vintage which prevented pl-insert from taking its
+proper index argument. Added special-case handling for unpausing playback
+when playing with ogg123.
+
+----------------------
+
 Version 1.5.6:
 
 Four small bugs were fixed. Moosic has been placed in the public domain by way

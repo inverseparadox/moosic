@@ -3,7 +3,7 @@
 # "install" utility program, python, and the pod2man and pod2html utilities (the
 # latter two are usually included with Perl).
 
-VERSION=1.5.6
+VERSION=1.5.7
 PROGRAMS=moosic moosicd
 STATIC_DOCS=../README.txt ../License.txt ../ChangeLog ../NEWS \
     Todo History Moosic_API.txt moosic_hackers.txt
