@@ -641,7 +641,7 @@
 
    Process an array of calls, and return an array of results. Calls
            should be structs of the form {'methodName': string, 'params': array}.
-           Each result will either be a single-item array containg the result
+           Each result will either be a single-item array containing the result
            value, or a struct of the form {'faultCode': int, 'faultString':
            string}. This is useful when you need to make lots of small calls
            without lots of round trips.
