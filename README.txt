@@ -18,10 +18,10 @@ language (or later) and also includes support for threads.  It also relies on
 the Unix "find" utility.  It relies upon external programs for actually playing
 the music files.  The default setup uses mpg123 for MP3, timidity for MIDI,
 ogg123 for Ogg/Vorbis, mikmod for the whole range of MOD formats, TakCD for
-audio CDs, and SOX for a wide variety of sound other (mostly uncompressed) sound
-file formats.  Moosic will only work on Unix systems, since it uses a wide
-variety of Unix-only features.  All of these portability issues are noted within
-the source code.
+audio CDs, and SOX for a wide variety of other (mostly uncompressed) sound file
+formats.  Moosic will only work on Unix systems, since it uses a wide variety
+of Unix-only features.  All of these portability issues are noted within the
+source code.
 
 INSTALLATION:
 NOTE: These directions have not been updated for any changes that may follow
