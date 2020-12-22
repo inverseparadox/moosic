@@ -13,7 +13,7 @@ shuffling, and item removal according to regular expressions.  The server comes
 configured to play MP3, Ogg, MIDI, MOD, and WAV files.
 
 REQUIREMENTS:
-The primary requirement is a Python interpreter that supports version 2.2 of the
+The primary requirement is a Python interpreter that supports version 3.7 of the
 language (or later) and also includes support for threads.  It also relies on
 the Unix "find" utility.  It relies upon external programs for actually playing
 the music files.  The default setup uses mpg123 for MP3, timidity for MIDI,
@@ -24,6 +24,10 @@ variety of Unix-only features.  All of these portability issues are noted within
 the source code.
 
 INSTALLATION:
+NOTE: These directions have not been updated for any changes that may follow
+from updating the program for Python 3. If you encounter different behavior in
+the real world, patches to correct this to match reality would be appreciated.
+
 After extracting the archive file (tarball) used to distribute Moosic, change to
 the directory that contains Moosic, and run "python setup.py install" in a
 terminal window with the privileges of root (the system administration account).
