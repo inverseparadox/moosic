@@ -12,10 +12,10 @@ if sys.version < '2.2.3':
     DistributionMetadata.download_url = None
 
 setup(name = 'moosic',
-      version = '1.5.6',
-      author = 'Daniel J. Pearson',
-      author_email = 'daniel@nanoo.org',
-      url = 'http://www.nanoo.org/moosic/',
+      version = '1.5.7',
+      author = 'Andrew J. Buehler',
+      author_email = 'wanderer@fastmail.fm',
+      url = 'https://github.com/inverseparadox/moosic',
       #download_url = 'http://www.nanoo.org/moosic/dist/',
       license = 'The Unlicense',
       description = 'A powerful music queue manager.',

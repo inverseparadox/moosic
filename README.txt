@@ -1,6 +1,6 @@
 Moosic - A musical jukebox program.
-Version 1.5.6
-By Daniel Pearson
+Version 1.5.7
+By Daniel Pearson and Andrew Buehler
 
 Moosic is a music player that focuses on convenient and powerful playlist
 management.  It consists of a server process that maintains a queue of music
