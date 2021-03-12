@@ -55,7 +55,6 @@ and WAV files.
         ('share/doc/moosic/html',
             ['doc/Moosic_API.html', 'doc/moosic.html', 'doc/moosicd.html']),
         ('share/doc/moosic/examples',
-            ['examples/completion', 'examples/server_config']),
-        #('/etc/bash_completion.d/', ['examples/completion']),
+            ['examples/server_config']),
         ],
 )
